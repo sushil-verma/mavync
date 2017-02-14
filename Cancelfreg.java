@@ -51,6 +51,8 @@ public class Cancelfreg extends Fragment {
     private View rootView=null;
     private LayoutInflater inflate=null;
 
+    private boolean dataavailabletodisplay=false;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -89,10 +91,10 @@ public class Cancelfreg extends Fragment {
                 })
         );
 
-        if (mAdapter.getItemCount() == 0) {
+        if (dataavailabletodisplay)
+        {
             inflate = getActivity().getLayoutInflater();
             rootView = inflate.inflate(R.layout.no_cancelled_booking, null, false);
-
         }
 
         return rootView;
@@ -147,9 +149,17 @@ public class Cancelfreg extends Fragment {
             JSONArray countryListObj = responseObj.optJSONArray("transit");  //.getJSONArray("transit");
 
             int length = countryListObj.length();
-            if (!transit.isEmpty()) {
-                transit.removeAll(transit);
-            }
+            if (length>0) {
+
+
+                if (!transit.isEmpty()) {
+                    transit.removeAll(transit);
+                }
+
+
+
+
+
 
             for (int i = 0; i < length; i++) {
 
@@ -166,7 +176,9 @@ public class Cancelfreg extends Fragment {
 
             mAdapter.notifyDataSetChanged();
 
-
+            }
+            else
+                dataavailabletodisplay = true;
 
         }
         catch (JSONException e)
