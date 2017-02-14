@@ -406,7 +406,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
                         SharedPreferences.Editor editor=userid.edit();
 
                         editor.putString("userid",myuserid);
-                        editor.apply();
+                        editor.commit();
 
                         downloadprofiledata(myuserid);
 

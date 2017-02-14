@@ -74,7 +74,7 @@ public class Trackinglistviewfreg extends Fragment {
         }
         setRecyclerViewLayoutManager(mCurrentLayoutManagerType);
 
-        mAdapter = new Trackinglvadapter(transit);
+        mAdapter = new Trackinglvadapter(getActivity(),transit);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(getActivity(), mRecyclerView ,new RecyclerItemClickListener.OnItemClickListener() {

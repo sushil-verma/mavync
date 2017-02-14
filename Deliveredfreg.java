@@ -184,7 +184,7 @@ public class Deliveredfreg extends Fragment {
 
         String localuserid=userid.getString("userid","null");
 
-        String url ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=delivered"+"&userid="+localuserid;
+        String url ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=Delivered"+"&userid="+localuserid;
         GrabURL Excecute=new GrabURL();
         Excecute.execute(url);
     }
