@@ -716,18 +716,27 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
 
             System.out.println("json array length=" + length);
 
+            mMap.clear();
+            if(my_map_vehicle.size()>0)
+            my_map_vehicle.removeAll(my_map_vehicle);
 
-            if (length > 0) {
+        /*    if (length > 0) {
 
 
                 destination_address.setVisibility(View.VISIBLE);
-
                 // destination_address.setTextColor(Color.parseColor("#000fff"));
+            }*/
+
+            /*    if(length>0) {
+                book_shipment.setVisibility(View.VISIBLE);
+
             }
+
+*/
 
 
             if (length == 0) {
-                //Toast.makeText(getActivity(),"No Vehicle",Toast.LENGTH_SHORT).show();
+
                /* book_shipment.setText("No Vehicle In This Route!!!");
                 book_shipment.setVisibility(View.VISIBLE);*/
 
@@ -738,53 +747,49 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
 
             }
 
-        /*    if(length>0) {
-                book_shipment.setVisibility(View.VISIBLE);
+            else
 
-            }
+            {
 
-*/
+                destination_address.setVisibility(View.VISIBLE);
+                for (int i = 0; i < length; i++) {
 
-            my_map_vehicle.removeAll(my_map_vehicle);
-            mMap.clear();
-
-
-            for (int i = 0; i < length; i++) {
-
-                JSONObject jsonChildNode = countryListObj.getJSONObject(i);
+                    JSONObject jsonChildNode = countryListObj.getJSONObject(i);
 
 
-                // String id=null;
-                double longitute = 0.0;
-                double latitute = 0.0;
-                String description = null;
+                    // String id=null;
+                    double longitute = 0.0;
+                    double latitute = 0.0;
+                    String description = null;
 
-                try {
-
-
-                    // id = jsonChildNode.optString("id").toString();
-                    latitute = Double.valueOf(jsonChildNode.optString("latitute").toString());
-                    longitute = Double.valueOf(jsonChildNode.optString("longitude").toString());
-
-                    description = jsonChildNode.optString("description").toString();
+                    try {
 
 
-                } catch (NumberFormatException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                        // id = jsonChildNode.optString("id").toString();
+                        latitute = Double.valueOf(jsonChildNode.optString("latitute").toString());
+                        longitute = Double.valueOf(jsonChildNode.optString("longitude").toString());
+
+                        description = jsonChildNode.optString("description").toString();
 
 
-                my_map_vehicle.add(new Vehicle_Data(latitute, longitute, description));
-                temp_latlong = new LatLng(my_map_vehicle.get(i).getLatitute(), my_map_vehicle.get(i).getLongitute());
-                driver_marker = mMap.addMarker(new MarkerOptions().position(temp_latlong).icon(BitmapDescriptorFactory.fromResource(R.drawable.maptruck)).title("Description").snippet(description));
+                    } catch (NumberFormatException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+
+
+                    my_map_vehicle.add(new Vehicle_Data(latitute, longitute, description));
+                    temp_latlong = new LatLng(latitute,longitute);
+                    driver_marker = mMap.addMarker(new MarkerOptions().position(temp_latlong).icon(BitmapDescriptorFactory.fromResource(R.drawable.maptruck)).title("Description").snippet(description));
 
 
               /*  mMarkersHashMap.put(driver_marker, new MyMarker(description));
                 mMap.setInfoWindowAdapter(new MarkerInfoWindowAdapter());*/
 
 
-            }
+                }
+
+        }
 
 
         } catch (JSONException e) {
@@ -1252,79 +1257,80 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
             int length = countryListObj.length();
 
             System.out.println("json array length=" + length);
+            mMap.clear();
 
             if (length == 0) {
-                // Toast.makeText(getActivity(),"No Vehicle",Toast.LENGTH_SHORT).show();
+
                 Toast toast = Toast.makeText(getActivity(), "No Vehicle Available.", Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.setView(layout);
                 toast.show();
             }
 
-
-            for (int i = 0; i < length; i++) {
-
-                JSONObject jsonChildNode = countryListObj.getJSONObject(i);
+             else {
 
 
-                // String id=null;
-                double longitute = 0.0;
-                double latitute = 0.0;
-                String description = null;
+                for (int i = 0; i < length; i++) {
 
-                try {
+                    JSONObject jsonChildNode = countryListObj.getJSONObject(i);
 
 
-                    // id = jsonChildNode.optString("id").toString();
-                    longitute = Double.valueOf(jsonChildNode.optString("longitude").toString());
-                    latitute = Double.valueOf(jsonChildNode.optString("latitute").toString());
-                    description = jsonChildNode.optString("description").toString();
+                    // String id=null;
+                    double longitute = 0.0;
+                    double latitute = 0.0;
+                    String description = null;
+
+                    try {
 
 
-                } catch (NumberFormatException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                        // id = jsonChildNode.optString("id").toString();
+                        longitute = Double.valueOf(jsonChildNode.optString("longitude").toString());
+                        latitute = Double.valueOf(jsonChildNode.optString("latitute").toString());
+                        description = jsonChildNode.optString("description").toString();
+
+
+                    } catch (NumberFormatException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+
+                    mMyMarkersArray.add(new MyMarker(description));
+                    my_map_vehicle.add(new Vehicle_Data(latitute, longitute, description));
+                    temp_latlong = new LatLng(latitute,longitute);
+                    driver_marker = mMap.addMarker(new MarkerOptions().position(temp_latlong).icon(BitmapDescriptorFactory.fromResource(R.drawable.maptruck)).title(description));
+
+
                 }
-
-                mMyMarkersArray.add(new MyMarker(description));
-
-
-                my_map_vehicle.add(new Vehicle_Data(latitute, longitute, description));
-                temp_latlong = new LatLng(my_map_vehicle.get(i).getLatitute(), my_map_vehicle.get(i).getLongitute());
-                driver_marker = mMap.addMarker(new MarkerOptions().position(temp_latlong).icon(BitmapDescriptorFactory.fromResource(R.drawable.maptruck)));
-                mMap.getMyLocation();
-
             }
 
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-            System.out.println("Error in reading json object");
-        }
-
-
-        try {
-            CameraPosition cameraPosition = new CameraPosition.Builder().target(temp_latlong).zoom(9.0f).build();
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
-            mMap.moveCamera(cameraUpdate);
-
-            mMap.getUiSettings().setZoomControlsEnabled(true);
-            if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
+            }catch(JSONException e){
+                e.printStackTrace();
+                System.out.println("Error in reading json object");
             }
-            mMap.setMyLocationEnabled(true);
-        } catch (Exception e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+
+
+            try {
+                CameraPosition cameraPosition = new CameraPosition.Builder().target(temp_latlong).zoom(9.0f).build();
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+                mMap.moveCamera(cameraUpdate);
+
+                mMap.getUiSettings().setZoomControlsEnabled(true);
+                if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+                mMap.setMyLocationEnabled(true);
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
 
 

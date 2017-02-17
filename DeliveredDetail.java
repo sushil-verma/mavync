@@ -41,62 +41,38 @@ public class DeliveredDetail extends AppCompatActivity {
 	private TextView f_bill; 
 	private TextView truck_no;
 	private  Toolbar toolbar;
-	
-	 private SharedPreferences sharedpreferences;
-	   private SharedPreferences.Editor editor;
-	   public static final String MyPREFERENCES = "MyPrefs" ;
-	   private String userid=null;
-	   private String shipment_id=null;
+	private String userid=null;
+	private String shipment_id=null;
 	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		
-		
-		 sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
-	     userid= sharedpreferences.getString("customer_id", "null");
-	     
-	     shipment_id=getIntent().getStringExtra("shipment_id");
-		
-		
-		
-		
-	    String url ="http://121.241.125.91/cc/mavyn/online/ownerwiseupdate.php?msg=confirmdetail&userid="+userid+"&shipmentid="+shipment_id;
-		new GrabURL().execute(url);
 		setContentView(R.layout.confirm_box);
+
+
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		shipment_id=String.valueOf(getIntent().getIntExtra("shipment_id",0));
+		userid=getIntent().getStringExtra("user_id");
 		
-		shipment_no=(TextView)findViewById(R.id.shipment_no);
+		String url ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=delivereddetail&userid="+userid+"&shipmentid="+shipment_id;
+		new GrabURL().execute(url);
+
+		shipment_no=(TextView)findViewById(R.id.cdetailshipment_no);
 		shipment_date_time=(TextView)findViewById(R.id.ship_date_time);
 		truck_no=(TextView)findViewById(R.id.truck_no);
 		truck_type=(TextView)findViewById(R.id.truck_type);
 		driver_name=(TextView)findViewById(R.id.driver_name);
 		mobile_no=(TextView)findViewById(R.id.driver_no);
 		origin=(TextView)findViewById(R.id.origin);
-		destination=(TextView)findViewById(R.id.destination);
+		destination=(TextView)findViewById(R.id.cdetaildestination);
 		distance=(TextView)findViewById(R.id.travel_distance);
 		time=(TextView)findViewById(R.id.travel_time);
 		myeta=(TextView)findViewById(R.id.eta);
 	    f_bill=(TextView)findViewById(R.id.freight_bill);
 		
-		/*ActionBar actionBar = getActionBar();
-	    actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#d84c00")));
-		actionBar.setCustomView(R.layout.confirmshipdetail);
-		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM
-		        | ActionBar.DISPLAY_SHOW_HOME); 
-		
-		   actionBar.setDisplayShowCustomEnabled(true);
-		   actionBar.setDisplayHomeAsUpEnabled(false);
-		   actionBar.setHomeButtonEnabled(true);
-		   getActionBar().setDisplayShowHomeEnabled(true);
-           actionBar.setIcon(R.drawable.newback);*/
-           //actionBar.setHideOnContentScrollEnabled(true); //need api 21
 
-		    // actionBar.set
 
-		toolbar = (Toolbar) findViewById(R.id.toolbar);
-		setSupportActionBar(toolbar);
 		   
 	    }
 	
@@ -168,13 +144,7 @@ public class DeliveredDetail extends AppCompatActivity {
     	return local; 
    }
 
-    	  protected void onCancelled() 
-    	  {
-    	   dialog.dismiss();
-    	   Toast toast = Toast.makeText(DeliveredDetail.this,"Error connecting to Server", Toast.LENGTH_LONG);
-    	   toast.setGravity(Gravity.TOP, 25, 400);
-    	   toast.show();
-    	   }
+
 
     	  protected void onPostExecute(String content) 
     	  {

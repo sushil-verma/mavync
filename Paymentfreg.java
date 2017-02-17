@@ -301,8 +301,9 @@ public class Paymentfreg extends Fragment {
                 String  truck_type=jsonChildNode.optString("truck_type");
                 String  to=jsonChildNode.optString("from");
                 String  from = jsonChildNode.optString("to");
+                String  driverimg = jsonChildNode.optString("driverimg");
                 int shipmentNo=Integer.parseInt(jsonChildNode.optString("shipmentno").toString());
-                Transit_record tempclass=new Transit_record(Date_time,truck_type,from,to,shipmentNo);
+                Transit_record tempclass=new Transit_record(Date_time,truck_type,from,to,shipmentNo,"http://121.241.125.91/cc/mavyn/online/"+driverimg);
                 transit.add(tempclass);
             }
 

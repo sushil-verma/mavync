@@ -66,13 +66,12 @@ public class Cancelfreg extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.recycler_view_frag, container, false);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new CancelledAdapter(transit);
+        mAdapter = new CancelledAdapter(getActivity(),transit);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(getActivity(), mRecyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
@@ -120,9 +119,7 @@ public class Cancelfreg extends Fragment {
                         volleyError.printStackTrace();
                     }
 
-
                 })
-
         {
 
 
@@ -156,11 +153,6 @@ public class Cancelfreg extends Fragment {
                     transit.removeAll(transit);
                 }
 
-
-
-
-
-
             for (int i = 0; i < length; i++) {
 
                 JSONObject jsonChildNode = countryListObj.getJSONObject(i);
@@ -168,8 +160,9 @@ public class Cancelfreg extends Fragment {
                 String truck_type = jsonChildNode.optString("truck_type");
                 String to = jsonChildNode.optString("from");
                 String from = jsonChildNode.optString("to");
+                String  driverimg = jsonChildNode.optString("driverimg");
                 int shipmentNo = Integer.parseInt(jsonChildNode.optString("shipmentno").toString());
-                Transit_record tempclass = new Transit_record(Date_time, truck_type, from, to, shipmentNo);
+                Transit_record tempclass = new Transit_record(Date_time, truck_type, from, to, shipmentNo,"http://121.241.125.91/cc/mavyn/online/"+driverimg);
                 transit.add(tempclass);
             }
 

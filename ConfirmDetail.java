@@ -5,18 +5,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.app.ActionBar;
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -27,8 +19,6 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
-
-
 import com.google.gson.Gson;
 
 public class ConfirmDetail extends AppCompatActivity {
@@ -43,66 +33,40 @@ public class ConfirmDetail extends AppCompatActivity {
 	private TextView  mobile_no;
 	private TextView  shipment_no;
 	private TextView  myeta;
-	private TextView f_bill; 
+	private TextView f_bill;
 	private TextView truck_no;
 	private  Toolbar toolbar;
-	
-	 private SharedPreferences sharedpreferences;
-	   private SharedPreferences.Editor editor;
-	   public static final String MyPREFERENCES = "MyPrefs" ;
-	   private String userid=null;
-	   private String shipment_id=null;
-	
+	private String userid=null;
+	private String shipment_id=null;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		
-		
-		 sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
-	     userid= sharedpreferences.getString("customer_id", "null");
-	     
-	     shipment_id=getIntent().getStringExtra("shipment_id");
-		
-		
-		
-		
-	    String url ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=confirmdetail&userid="+userid+"&shipmentid="+shipment_id;
-		new GrabURL().execute(url);
 		setContentView(R.layout.confirm_box);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 		
-		shipment_no=(TextView)findViewById(R.id.shipment_no);
+		shipment_id=String.valueOf(getIntent().getIntExtra("shipment_id",0));
+		userid=getIntent().getStringExtra("user_id");
+		String url ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=confirmdetail&userid="+userid+"&shipmentid="+shipment_id;
+		new GrabURL().execute(url);
+
+		
+		shipment_no=(TextView)findViewById(R.id.cdetailshipment_no);
 		shipment_date_time=(TextView)findViewById(R.id.ship_date_time);
 		truck_no=(TextView)findViewById(R.id.truck_no);
 		truck_type=(TextView)findViewById(R.id.truck_type);
 		driver_name=(TextView)findViewById(R.id.driver_name);
 		mobile_no=(TextView)findViewById(R.id.driver_no);
 		origin=(TextView)findViewById(R.id.origin);
-		destination=(TextView)findViewById(R.id.destination);
+		destination=(TextView)findViewById(R.id.cdetaildestination);
 		distance=(TextView)findViewById(R.id.travel_distance);
 		time=(TextView)findViewById(R.id.travel_time);
 		myeta=(TextView)findViewById(R.id.eta);
 	    f_bill=(TextView)findViewById(R.id.freight_bill);
 		
-		/*ActionBar actionBar = getActionBar();
-	    actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#d84c00")));
-		actionBar.setCustomView(R.layout.confirmshipdetail);
-		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM
-		        | ActionBar.DISPLAY_SHOW_HOME); 
-		
-		   actionBar.setDisplayShowCustomEnabled(true);
-		   actionBar.setDisplayHomeAsUpEnabled(false);
-		   actionBar.setHomeButtonEnabled(true);
-		   getActionBar().setDisplayShowHomeEnabled(true);
-           actionBar.setIcon(R.drawable.newback);*/
-           //actionBar.setHideOnContentScrollEnabled(true); //need api 21
 
-		    // actionBar.set
-
-		toolbar = (Toolbar) findViewById(R.id.toolbar);
-		setSupportActionBar(toolbar);
-		   
 	    }
 	
 	private class GrabURL extends AsyncTask<String, Void, String> 
@@ -243,6 +207,19 @@ public class ConfirmDetail extends AppCompatActivity {
    
     class Transit_record
     {
+
+		private String shipmentno=null;
+		private String date_time=null;
+		private String truckno=null;
+		private String truck_type=null;
+		private String DriverName=null;
+		private String DriverMobileNo=null;
+		private String from=null;
+		private String to=null;
+		private String distance=null;
+		private String time=null;
+		private String ETA=null;
+		private String freightbill=null;
     	 public String getShipmentno() {
 			return shipmentno;
 		}
@@ -279,18 +256,8 @@ public class ConfirmDetail extends AppCompatActivity {
 		public String getBookingDate() {
 			return freightbill;
 		}
-	 	private String shipmentno=null;   	
-    	 private String date_time=null;
-    	 private String truckno=null;
-    	 private String truck_type=null;
-    	 private String DriverName=null;
-    	 private String DriverMobileNo=null;
-    	 private String from=null;
-    	 private String to=null;
-    	 private String distance=null;
-    	 private String time=null;
-    	 private String ETA=null;
-    	 private String freightbill=null;
+
+
     	
     } 
     	   
