@@ -32,7 +32,9 @@ public class Trackinglvadapter extends RecyclerView.Adapter<Trackinglvadapter.Vi
         private  TextView trucknumber=null;
         private  TextView decription=null;
         private  TextView drivername=null;
+        private  TextView current_date_time=null;
         private  RoundImage driverImage=null;
+
 
         public TextView getTrucknumber() {
             return trucknumber;
@@ -46,19 +48,24 @@ public class Trackinglvadapter extends RecyclerView.Adapter<Trackinglvadapter.Vi
             return drivername;
         }
 
+        public TextView getCurrentDataTime() {
+            return current_date_time;
+        }
+
         public RoundImage getDriverimage() {
             return driverImage;
         }
 
         public ViewHolder(View v) {
             super(v);
-            // Define click listener for the ViewHolder's View.
+
+            /*// Define click listener for the ViewHolder's View.
             v.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Log.d(TAG, "Element " + getAdapterPosition() + " clicked.");
                 }
-            });
+            });*/
 
 
             trucknumber=(TextView)v.findViewById(R.id.vehicle_number);
