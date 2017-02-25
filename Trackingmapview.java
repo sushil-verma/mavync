@@ -11,6 +11,7 @@ import java.util.HashMap;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -47,6 +48,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class Trackingmapview extends Fragment implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private View view;
@@ -91,9 +94,12 @@ public class Trackingmapview extends Fragment implements OnMapReadyCallback, Goo
                 .addOnConnectionFailedListener(this)
                 .build();
         mMarkersHashMap = new HashMap<Marker, MyMarker>();
+/*
+        SharedPreferences userid = getActivity().getSharedPreferences("U_id", MODE_PRIVATE);
+        String customer_id = userid.getString("userid", null);*/
 
         hit_vehicle = new Download_Vehicle(getActivity());
-        hit_vehicle.execute("http://121.241.125.91/cc/mavyn/online/customerloginafter.php?msg=trackall&userid=");
+        hit_vehicle.execute("http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=trackall&userid="+getActivity().getSharedPreferences("U_id", MODE_PRIVATE).getString("userid", null));
 
 
     }
@@ -142,6 +148,9 @@ public class Trackingmapview extends Fragment implements OnMapReadyCallback, Goo
 
 
     }
+
+
+
 
 
     private class Download_Vehicle extends AsyncTask<String, Void, String> {
@@ -249,7 +258,7 @@ public class Trackingmapview extends Fragment implements OnMapReadyCallback, Goo
                 my_map_vehicle.add(new Vehicle_Data(latitute,longitute,description));
 */
                 temp_latlong = new LatLng(latitute, longitute);
-                driver_marker = googleMap.addMarker(new MarkerOptions().position(temp_latlong).icon(BitmapDescriptorFactory.fromResource(R.drawable.maptruck)));
+                driver_marker = googleMap.addMarker(new MarkerOptions().position(temp_latlong).icon(BitmapDescriptorFactory.fromResource(R.drawable.maptruck)).snippet(description));
                 mMarkersHashMap.put(driver_marker, new MyMarker(description));
                 googleMap.setInfoWindowAdapter(new MarkerInfoWindowAdapter());
             }

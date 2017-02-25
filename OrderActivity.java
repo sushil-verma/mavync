@@ -13,8 +13,10 @@ import android.os.AsyncTask;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
@@ -25,6 +27,12 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -44,6 +52,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OrderActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -56,12 +66,12 @@ public class OrderActivity extends AppCompatActivity implements View.OnClickList
     private int hour;
     private int minute;
     private static volatile double originlate, originlong, destinationlate, destinationlong;
-
     private TextView source, destination;
     private AutoCompleteTextView name, mobile, address;
     private String distance;
     private Intent intent, intentlocal;
     private View focusView = name;
+    private City_list_Dbhlper city_list;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -73,6 +83,12 @@ public class OrderActivity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order);
 
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+
+        city_list = new City_list_Dbhlper(getApplicationContext());
         intent = new Intent(this, ConfirmShipment.class);
 
         dateView = (Button) findViewById(R.id.date);
@@ -100,6 +116,13 @@ public class OrderActivity extends AppCompatActivity implements View.OnClickList
         source.setText(intentlocal.getStringExtra("source"));
         destination.setText(intentlocal.getStringExtra("destination"));
 
+        Bundle Source_lat_long=city_list.getData(intentlocal.getStringExtra("source"));
+        Bundle destination_lat_long=city_list.getData(intentlocal.getStringExtra("destination"));
+
+                 originlate = Double.valueOf(Source_lat_long.getString("latitude"));
+                 originlong=Double.valueOf(Source_lat_long.getString("longitude"));
+                 destinationlate=Double.valueOf(destination_lat_long.getString("latitude"));
+                 destinationlong=Double.valueOf(destination_lat_long.getString("longitude"));
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -137,7 +160,7 @@ public class OrderActivity extends AppCompatActivity implements View.OnClickList
 
              else
                  if (!ismobile_noValid(mobile_no1)) {
-                     mobile.setError("No invalid");
+                     mobile.setError("Number invalid");
                     focusView = mobile;
                     cancel = true;
                 }
@@ -305,11 +328,15 @@ public class OrderActivity extends AppCompatActivity implements View.OnClickList
 
                 if (cheking() == false) {
 
-                    hit.execute("http://121.241.125.91/cc/mavyn/online/customerbooking.php?customer_id=" + customer_id + "&" + "source=" + source.getText() + "&" + "source_lat=" + originlate + "&" + "source_long=" + originlong + "&" + "destination=" + destination.getText() + "&" + "destination_lat=" + destinationlate + "&" + "destination_long=" + destinationlong + "&" + "user_name=" + name.getText() + "&" + "user_mobile=" + mobile.getText() + "&" + "user_address=" + address.getText() + "&" + "booking_date=" + dateView.getText() + "&" + "booking_time=" + timeView.getText() + "&" + "vehicletype_id=" + vehicle_id);
+                //    String url = "http://121.241.125.91/cc/mavyn/online/customerbooking.php";//?customer_id=" + customer_id + "&" + "source=" + source.getText() + "&" + "source_lat=" + originlate + "&" + "source_long=" + originlong + "&" + "destination=" + destination.getText() + "&" + "destination_lat=" + destinationlate + "&" + "destination_long=" + destinationlong + "&" + "user_name=" + name.getText() + "&" + "user_mobile=" + mobile.getText() + "&" + "user_address=" + address.getText() + "&" + "booking_date=" + dateView.getText() + "&" + "booking_time=" + timeView.getText() + "&" + "vehicletype_id=" + vehicle_id;
+//
+                 //   String abc = "http://121.241.125.91/cc/mavyn/online/customerbooking.php?customer_id=" + customer_id + "&" + "source='" + source.getText() + "'&" + "source_lat=" + originlate + "&" + "source_long=" + originlong + "&" + "destination='" + destination.getText() + "'&" + "destination_lat=" + destinationlate + "&" + "destination_long=" + destinationlong + "&" + "user_name=" + name.getText() + "&" + "user_mobile=" + mobile.getText() + "&" + "user_address=" + address.getText() + "&" + "booking_date=" + dateView.getText() + "&" + "booking_time=" + timeView.getText() + "&" + "vehicletype_id=" + vehicle_id;
+                    // hit.execute(abc);
+                   // registerUser(url, customer_id, source.getText(), originlate, originlong, destination.getText(), destinationlate, destinationlong, name.getText(), mobile.getText(), address.getText(), dateView.getText(), timeView.getText(), vehicle_id);
+                  //  registerUser(url,customer_id,source.getText(),originlate,originlong,destination.getText(),destinationlate,destinationlong,name.getText(),mobile.getText(),address.getText(),dateView.getText(),timeView.getText(),);
 
                 }
 
-                break;
 
 
             case R.id.cancelshipment:
@@ -320,6 +347,56 @@ public class OrderActivity extends AppCompatActivity implements View.OnClickList
 
 
     }
+
+
+    private void registerUser(final String url, final String customer_id, final String source,final  String source_lat, final String source_long, final  String destination, final  String destination_lat, final  String destination_long, final String user_name, final  String user_mobile, final  String user_address, final String booking_date, final String booking_time, final String vehicletype_id){
+
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        ReceiveJsonData(response);
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.fillInStackTrace();
+                    }
+                }){
+            @Override
+            protected Map<String,String> getParams(){
+                Map<String,String> params = new HashMap<String, String>();
+                params.put("customer_id",customer_id);
+                params.put("source",source);
+                params.put("source_lat", source_lat);
+                params.put("source_long", source_long);
+                params.put("destination", destination);
+                params.put("destination_lat", destination_lat);
+                params.put("destination_long", destination_long);
+                params.put("user_name", user_name);
+                params.put("user_mobile", user_mobile);
+                params.put("user_address", user_address);
+                params.put("booking_date", booking_date);
+                params.put("booking_time", booking_time);
+                params.put("vehicletype_id", vehicletype_id);
+
+                return params;
+               // String abc="http://121.241.125.91/cc/mavyn/online/customerbooking.php?customer_id=" + customer_id + "&" + "source='" + source.getText() + "'&" + "source_lat=" + originlate + "&" + "source_long=" + originlong + "&" + "destination='" + destination.getText() + "'&" + "destination_lat=" + destinationlate + "&" + "destination_long=" + destinationlong + "&" + "user_name=" + name.getText() + "&" + "user_mobile=" + mobile.getText() + "&" + "user_address=" + address.getText() + "&" + "booking_date=" + dateView.getText() + "&" + "booking_time=" + timeView.getText() + "&" + "vehicletype_id=" + vehicle_id;
+
+            }
+
+        };
+
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(stringRequest);
+    }
+
+
+
 
     @Override
     public void onStart() {
@@ -387,27 +464,20 @@ public class OrderActivity extends AppCompatActivity implements View.OnClickList
                 URL url = new URL(urls[0]);
                 con = (HttpURLConnection) url.openConnection();
                 bufferinput = new BufferedReader(new InputStreamReader((con.getInputStream())));
-                try {
+
                     local = bufferinput.readLine();
                     System.out.println("json data" + local);
-                } catch (Exception e) {
+                    bufferinput.close();
+                    Log.i("Json data received..", local);
 
-                    System.out.println("json data not fetched");
-                }
 
-                Log.i("Json data received..", local);
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.i("Erro", "data downloading erro");
 
             }
 
-            try {
-                bufferinput.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+
             con.disconnect();
 
             return local;
@@ -458,10 +528,6 @@ public class OrderActivity extends AppCompatActivity implements View.OnClickList
 
                 JSONObject jsonChildNode = countryListObj.getJSONObject(i);
 
-
-                try {
-
-
                     shipmentno = jsonChildNode.optString("shipmentno").toString();
                     expectedtime_normal = jsonChildNode.optString("Etnormal").toString();
                     expecteddistance_normal = jsonChildNode.optString("Tdistancenormal").toString();
@@ -470,32 +536,27 @@ public class OrderActivity extends AppCompatActivity implements View.OnClickList
                     expecteddistanceexpress = jsonChildNode.optString("Tdistanceexpress").toString();
                     expectedfreightexpress = jsonChildNode.optString("Efreightexpress").toString();
 
-
-                } catch (NumberFormatException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-
             }
 
 
-        } catch (JSONException e) {
+        } catch (JSONException e ) {
             e.printStackTrace();
             System.out.println("Error in reading json object");
         }
+        catch (NumberFormatException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
 
 
         intent.putExtra("shipmentno", shipmentno);
         intent.putExtra("exptimenormal", expectedtime_normal);
         intent.putExtra("exptimeexpress", expetedtimeexpress);
-
         intent.putExtra("expdistance", expecteddistance_normal);
         intent.putExtra("expdistanceexp", expecteddistanceexpress);
-
         intent.putExtra("expectedfreight_normal", expectedfreight_normal);
         intent.putExtra("expectedfreightexpress", expectedfreightexpress);
-
         intent.putExtra("source", intentlocal.getStringExtra("source"));
         intent.putExtra("destination", intentlocal.getStringExtra("destination"));
         intent.putExtra("address", address.getText());
@@ -508,21 +569,19 @@ public class OrderActivity extends AppCompatActivity implements View.OnClickList
     }
 
 
-   /* private double distance(double lat1, double lon1, double lat2, double lon2) {
-        double theta = lon1 - lon2;
-        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
-        dist = Math.acos(dist);
-        dist = rad2deg(dist);
-        dist = dist * 60 * 1.1515;
-        return (dist);
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                //finish();
+                onBackPressed();
+                break;
+        }
+        return true;
     }
 
-    private double deg2rad(double deg) {
-        return (deg * Math.PI / 180.0);
-    }
-    private double rad2deg(double rad) {
-        return (rad * 180.0 / Math.PI);
-    }*/
 
 
     class Distance implements Runnable {

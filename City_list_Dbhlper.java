@@ -6,54 +6,81 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Bundle;
 
 import java.util.ArrayList;
-import java.util.List;
-
-public class City_state_Dbhlper extends SQLiteOpenHelper {
-
-   private static final String DATABASE_NAME = "City_list.db";
-   private static final String TABLE_NAME ="city_list";
-   private static final String city_name ="city_name";
 
 
+public class City_list_Dbhlper extends SQLiteOpenHelper {
 
+   private static final String DATABASE_NAME = "OperationCity.db";
+   private static final String TABLE_NAME ="city_table";
+   private static final String city_name ="name";
+    private static final String city_lat ="latitude";
+    private static final String city_long ="longitude";
+    private static final String id ="id";
 
-   public City_state_Dbhlper(Context context)
+   public City_list_Dbhlper(Context context)
    {
-      super(context, DATABASE_NAME , null, 1);
+      super(context, DATABASE_NAME , null, 5);
    }
 
    @Override
    public void onCreate(SQLiteDatabase db) {
       // TODO Auto-generated method stub
-       db.execSQL("DROP TABLE IF EXISTS TABLE_NAME");
+       db.execSQL("DROP TABLE IF EXISTS "+ TABLE_NAME);
       db.execSQL(
       "create table "+ TABLE_NAME +
-      "(city_name text)"
+      "(name text,latitude text,longitude text)"
       );
    }
 
    @Override
    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
       // TODO Auto-generated method stub
-      db.execSQL("DROP TABLE IF EXISTS TABLE_NAME");
-      onCreate(db);
+       if(newVersion>oldVersion) {
+
+
+           if (newVersion > oldVersion) {
+               db.execSQL("ALTER TABLE city_table ADD COLUMN id TEXT");
+
+           }
+
+       }
+
    }
 
-   public boolean insertContact  (String city)
+   public boolean insertContact  (String city,String lat,String lon,String id)
    {
       SQLiteDatabase db = this.getWritableDatabase();
       ContentValues contentValues = new ContentValues();
-      contentValues.put("city_name", city);
-      db.insert("city_list", null, contentValues);
+      contentValues.put("name", city);
+       contentValues.put("latitude", lat);
+       contentValues.put("longitude", lon);
+       contentValues.put("id", id);
+
+       db.insert("city_table", null, contentValues);
       return true;
    }
    
-   public Cursor getData(int id){
+   public Bundle getData(String cityname){
       SQLiteDatabase db = this.getReadableDatabase();
-      Cursor res =  db.rawQuery( "select * from"+ TABLE_NAME, null );
-      return res;
+       Bundle local = new Bundle();
+       Cursor res =  db.rawQuery( "select * from "+ TABLE_NAME +" where name='"+cityname+"'", null );
+
+       res.moveToFirst();
+
+       int abc=res.getCount();
+
+       while(res.isAfterLast() == false){
+
+           String lati=res.getString(res.getColumnIndex(city_lat));
+           String longi=res.getString(res.getColumnIndex(city_long));
+           local.putString("latitude",lati);
+           local.putString("longitude",longi);
+           res.moveToNext();
+       }
+      return local;
    }
    
    public int numberOfRows(){
@@ -62,12 +89,12 @@ public class City_state_Dbhlper extends SQLiteOpenHelper {
       return numRows;
    }
 
-   public Integer deleteCity (Integer id)
+   public Integer deleteCity (String id)
    {
       SQLiteDatabase db = this.getWritableDatabase();
       return db.delete(TABLE_NAME,
       "id = ? ", 
-      new String[] { Integer.toString(id) });
+      new String[] { id });
    }
    
    public ArrayList<String> getAlldata()
@@ -76,7 +103,7 @@ public class City_state_Dbhlper extends SQLiteOpenHelper {
       
       //hp = new HashMap();
       SQLiteDatabase db = this.getReadableDatabase();
-      Cursor res =  db.rawQuery( "select * from "+TABLE_NAME, null );
+      Cursor res =  db.rawQuery( "select name from "+TABLE_NAME, null );
       res.moveToFirst();
       
       while(res.isAfterLast() == false){

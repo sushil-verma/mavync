@@ -80,7 +80,7 @@ public class SplasScreen extends AppCompatActivity {
 	//open all databases
 
 
-	private City_state_Dbhlper city_db;
+	private City_list_Dbhlper city_db;
 	private Open_Catrgy_Dbhlper open_ctrgy_db;
 	private Open_vehicle_Db open_ctrgy_vehicle_db;
 
@@ -141,13 +141,14 @@ public class SplasScreen extends AppCompatActivity {
 		setContentView(R.layout.activity_splash);
 
 
-
-
-		city_db=new City_state_Dbhlper(SplasScreen.this);
-		open_ctrgy_db=new Open_Catrgy_Dbhlper(SplasScreen.this);
 		closed_ctrgy_db=new Cls_Catrgy_Dbhlper(SplasScreen.this);
 		open_ctrgy_vehicle_db=new Open_vehicle_Db(SplasScreen.this);
 		close_ctrgy_vehicle_db=new Close_vehicle_Db(SplasScreen.this);
+
+		city_db=new City_list_Dbhlper(SplasScreen.this);
+
+		open_ctrgy_db=new Open_Catrgy_Dbhlper(SplasScreen.this);
+
 
 		if(closed_ctrgy_db.numberOfRows()>0)
 			closed_ctrgy_db.deletetb();
@@ -243,18 +244,16 @@ public class SplasScreen extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
+				hit_vehicle_close = new Download_First_Close_Vehicle(SplasScreen.this);
 
-
-					hit_vehicle_close = new Download_First_Close_Vehicle(SplasScreen.this);
-
-		Thread close_vehucle = new Thread(hit_vehicle_close);
-		close_vehucle.start();
-		try {
-			close_vehucle.join();
-		}
-		catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+				Thread close_vehucle = new Thread(hit_vehicle_close);
+				close_vehucle.start();
+				try {
+					close_vehucle.join();
+				}
+				catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 
 
 
@@ -288,7 +287,7 @@ public class SplasScreen extends AppCompatActivity {
 			}
 		},3000);
 
-
+		                                                                                              ;
 	  }
 
 
@@ -460,11 +459,15 @@ public class SplasScreen extends AppCompatActivity {
 
 
 					String Citydata=null;
+					String lat=null;
+					String lon=null;
 
 
 					try {
 
-						  Citydata = jsonChildNode.optString("city").toString();
+						Citydata = jsonChildNode.optString("city").toString();
+						lat=jsonChildNode.optString("lat").toString();
+						lon=jsonChildNode.optString("long").toString();
 
 					    }
 
@@ -474,9 +477,11 @@ public class SplasScreen extends AppCompatActivity {
 					}
 
 					//citylistlocal.add(Citydata);
-					city_db.insertContact(Citydata);
+					city_db.insertContact(Citydata,lat,lon,String.valueOf(i+1));
 
 				}
+
+				//city_db.insertContact("naraina","12.232323","12.32323");
 
 			}
 			catch (JSONException e)
@@ -526,16 +531,10 @@ public class SplasScreen extends AppCompatActivity {
 
 				con = (HttpURLConnection) url.openConnection();
 				bufferinput = new BufferedReader(new InputStreamReader((con.getInputStream())));
-				try
-				{
-					local = bufferinput.readLine();
+				local = bufferinput.readLine();
 
-				}
-				catch (Exception e)
-				{
-
-					e.printStackTrace();
-				}
+				bufferinput.close();
+				con.disconnect();
 
 
 			}
@@ -545,18 +544,6 @@ public class SplasScreen extends AppCompatActivity {
 				e.printStackTrace();
 
 			}
-
-			try
-			{
-				bufferinput.close();
-				con.disconnect();
-			}
-			catch (IOException e)
-			{
-
-				e.printStackTrace();
-			}
-
 
 			Display_Vehicle_list_category(local);
 	    	}

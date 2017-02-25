@@ -144,8 +144,8 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
     private ArrayAdapter<String> adapter;
     private Open_Catrgy_Dbhlper open_ctrgy_db;
     private Cls_Catrgy_Dbhlper closed_ctrgy_db;
-    private City_state_Dbhlper city_list;
-    //private City_state_Dbhlper city_db;
+    private City_list_Dbhlper city_list;
+    //private City_list_Dbhlper city_db;
 
     private Open_Catrgy_vehicle_for_Dbhlper open_ctrgy_vehicle_db;
 
@@ -166,7 +166,7 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
         Handler handler = new Handler();
 
 
-        city_list = new City_state_Dbhlper(getActivity());
+        city_list = new City_list_Dbhlper(getActivity());
         open_ctrgy_db = new Open_Catrgy_Dbhlper(getActivity());
 
         closed_ctrgy_db = new Cls_Catrgy_Dbhlper(getActivity());
@@ -202,12 +202,9 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
 
             mycategoryadapter = new CategoryAdapter(myvehicle_category, getActivity());
             mycategoryadapter.setSelected(0);
-
             mycategoryadapter.notifyDataSetChanged();
-
             mycategoryadapterclose = new CategoryAdapterclose(myvehicle_categoryclose, getActivity());
             mycategoryadapterclose.setSelected(0);
-
             mycategoryadapterclose.notifyDataSetChanged();
 
 
@@ -347,9 +344,10 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
 
                     source = (String) arg0.getItemAtPosition(arg2);
 
+
+
                     if (network_connection_status) {
 
-                        // String url = "http://121.241.125.91/cc/mavyn/online/customerloginafter.php?bodytype=" + truck_staus + "&vehicletype=" + 9 + "&flocation=" + source;
                         String url = "http://121.241.125.91/cc/mavyn/online/customerloginafter.php?bodytype=" + truck_staus + "&vehicletype=" + v_id + "&flocation=" + source;
                         UpdateMap updateMapfirst = new UpdateMap(getActivity());
                         updateMapfirst.execute(url);
@@ -381,7 +379,6 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
                     if (network_connection_status) {
 
                         UpdateMap_destination updateMapsecond = new UpdateMap_destination(getActivity());
-                        //String url="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?bodytype="+truck_staus+"&vehicletype="+3+"&fromlocation="+source+"&tolocation="+destination;
                         String url = "http://121.241.125.91/cc/mavyn/online/customerloginafter.php?bodytype=" + truck_staus + "&vehicletype=" + v_id + "&flocation=" + source + "&tolocation=" + destination;
                         updateMapsecond.execute(url);
                     } else {
@@ -565,7 +562,7 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
                     recyclerView.setAdapter(mycategoryadapterclose);
                     close_button_pressed = true;
                     open_button_presses = false;
-                    truck_staus = "close";
+                    truck_staus = "closed";
 
 
                 }
@@ -737,8 +734,8 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
 
             if (length == 0) {
 
-               /* book_shipment.setText("No Vehicle In This Route!!!");
-                book_shipment.setVisibility(View.VISIBLE);*/
+                book_shipment.setText("No Vehicle In This Route!!!");
+                book_shipment.setVisibility(View.VISIBLE);
 
                 Toast toast = Toast.makeText(getActivity(), "No Vehicle Available.", Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER, 0, 0);
@@ -885,14 +882,7 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
             return local;
         }
 
-        /*  protected void onCancelled()
-          {
-           dialog.dismiss();
-           Toast toast = Toast.makeText(localcontext,"Error connecting to Server", Toast.LENGTH_LONG);
-           toast.setGravity(Gravity.TOP, 25, 400);
-           toast.show();
-           }
-    */
+
         protected void onPostExecute(String content) {
             dialog.dismiss();
 
@@ -907,6 +897,10 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
     private void update_Vehicle_on_map_destination(String response) {
 
         JSONObject responseObj;
+        mMap.clear();
+        if(my_map_vehicle.size()>0)
+        my_map_vehicle.removeAll(my_map_vehicle);
+
 
 
         try {
@@ -922,9 +916,9 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
 
             if (length == 0) {
                 //Toast.makeText(getActivity(),"No Vehicle",Toast.LENGTH_SHORT).show();
-                // book_shipment.setText("No Vehicle In This Route!!!");
+                book_shipment.setText("No Vehicle In This Route!!!");
                 // show_Booking_button();
-                //   book_shipment.setVisibility(View.VISIBLE)
+                book_shipment.setVisibility(View.VISIBLE);
                 Toast toast = Toast.makeText(getActivity(), "No Vehicle Available.", Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.setView(layout);
@@ -934,7 +928,8 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
             }
 
 
-            if (length > 0) {
+            else {
+
 
                 // book_shipment.setText("Create Shipment!!!");
 
@@ -942,48 +937,42 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
 
                 // book_shipment.setVisibility(View.VISIBLE);
 
-            }
+                for (int i = 0; i < length; i++) {
+
+                    JSONObject jsonChildNode = countryListObj.getJSONObject(i);
 
 
-            my_map_vehicle.removeAll(my_map_vehicle);
-            mMap.clear();
+                    // String id=null;
+                    double longitute = 0.0;
+                    double latitute = 0.0;
+                    String description = null;
+
+                    try {
 
 
-            for (int i = 0; i < length; i++) {
+                        // id = jsonChildNode.optString("id").toString();
+                        latitute = Double.valueOf(jsonChildNode.optString("latitute").toString());
+                        longitute = Double.valueOf(jsonChildNode.optString("longitude").toString());
 
-                JSONObject jsonChildNode = countryListObj.getJSONObject(i);
-
-
-                // String id=null;
-                double longitute = 0.0;
-                double latitute = 0.0;
-                String description = null;
-
-                try {
+                        description = jsonChildNode.optString("description").toString();
 
 
-                    // id = jsonChildNode.optString("id").toString();
-                    latitute = Double.valueOf(jsonChildNode.optString("latitute").toString());
-                    longitute = Double.valueOf(jsonChildNode.optString("longitude").toString());
-
-                    description = jsonChildNode.optString("description").toString();
-
-
-                } catch (NumberFormatException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                    } catch (NumberFormatException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
 
 
-                my_map_vehicle.add(new Vehicle_Data(latitute, longitute, description));
-                temp_latlong = new LatLng(my_map_vehicle.get(i).getLatitute(), my_map_vehicle.get(i).getLongitute());
-                driver_marker = mMap.addMarker(new MarkerOptions().position(temp_latlong).icon(BitmapDescriptorFactory.fromResource(R.drawable.maptruck)).title("Description").snippet(description));
+                    my_map_vehicle.add(new Vehicle_Data(latitute, longitute, description));
+                    temp_latlong = new LatLng(latitute,longitute);
+                    driver_marker = mMap.addMarker(new MarkerOptions().position(temp_latlong).icon(BitmapDescriptorFactory.fromResource(R.drawable.maptruck)).title("Description").snippet(description));
 
 
               /*  mMarkersHashMap.put(driver_marker, new MyMarker(description));
                 mMap.setInfoWindowAdapter(new MarkerInfoWindowAdapter());*/
 
 
+                }
             }
 
 

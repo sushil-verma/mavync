@@ -14,9 +14,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -158,14 +160,8 @@ public class TrackingJourneylistviewfreg extends Fragment {
                         for (int i = 0; i < response.length(); i++) {
                             try {
                                 JSONObject object = response.getJSONObject(i);
-                                Tracklistdataclass localdata = new Tracklistdataclass();
 
-                                localdata.setVehicle_number(object.getString("vehicle_number"));
-
-
-                                localdata.setVehicle_description(object.getString("vehicl_description"));
-                                localdata.setDriver_name(object.getString("driver_name"));
-                                localdata.setDriver_image_url(object.getString("driverimageurl"));
+                                Tracklistdataclass localdata = new Tracklistdataclass(object.getString("vehicle_number"),object.getString("vehicl_description"),object.getString("driver_name"),object.getString("driverimageurl"));
 
                                 transit.add(localdata);
 
@@ -185,8 +181,9 @@ public class TrackingJourneylistviewfreg extends Fragment {
         });
 
         // Adding request to request queue
-        AppController.getInstance().addToRequestQueue(req);
-
+       // AppController.getInstance().addToRequestQueue(req);
+        RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
+        requestQueue.add(req);
 
     }
 

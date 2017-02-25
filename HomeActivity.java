@@ -42,8 +42,8 @@ public class HomeActivity extends AppCompatActivity {
     private  ArrayList<String> citylist2;
     private Open_Catrgy_Dbhlper open_ctrgy_db;
 
-    private City_state_Dbhlper city_list;
-    private City_state_Dbhlper city_db;
+    private City_list_Dbhlper city_list;
+    private City_list_Dbhlper city_db;
 
 
     void showDialog() {
@@ -81,7 +81,7 @@ public class HomeActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         fmanager=getSupportFragmentManager();
 
-      /*   city_db=new City_state_Dbhlper(HomeActivity.this);
+      /*   city_db=new City_list_Dbhlper(HomeActivity.this);
         open_ctrgy_db=new Open_Catrgy_Dbhlper(HomeActivity.this);
        open_ctrgy_vehicle_db=new Open_Catrgy_vehicle_for_Dbhlper(HomeActivity.this);
         closed_ctrgy_db=new Closed_Catrgy_Dbhlper(HomeActivity.this);

@@ -39,6 +39,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdate;
@@ -54,14 +60,17 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener, OnItemSelectedListener, OnMarkerClickListener {
 
-   Context context;
+   private Context context;
    private Confirmd_Dbhlper db;
    private static ArrayList<Cnfrmd_Vehicle_record> Cnfrmd_Vehicl_data=new ArrayList<Cnfrmd_Vehicle_record>(10);
    private View view;
-   MapView mMapView;
+   private MapView mMapView;
    private static volatile GoogleMap googleMap;
    private List<String>  vehicle_no_arraylist=new ArrayList<String>(); 
    private List<String>  vehicle_id_arraylist=new ArrayList<String>();
@@ -78,48 +87,24 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
    private int size=0;
    private	LinearLayout to_from;
 	private LinearLayout vehicle_flag;
-   private Download_vehicle_number	download_vehicle_no;
-   
+
    // polyline declaration
    private ArrayList<LatLng> points = null;
    private	PolylineOptions lineOptions = null;
-   
+	private static volatile MaterialBetterSpinner vehiclelist;
+	private ArrayAdapter<String> spinneradapter;
 
-   
-
-	 @Override
-     public void onViewCreated(View view, Bundle savedInstanceState) 
-	 {
-		  super.onViewCreated(view, savedInstanceState);
-		
-	 }
 
 	 @Override
 	    public void onCreate(Bundle savedInstanceState) 
 	 {
-	        super.onCreate(savedInstanceState);
-
-		   /* db=new Confirmd_Dbhlper(context);
-		 // if database is empty download from server or use database to show vehicle no in the spinner to be fast performance
-
-	        if(db.numberOfRows()>0)
-			{
-				vehicle_no_arraylist=db.getAllVehicle_no();
-				vehicle_id_arraylist=db.getVehicleid();
-			}
-
-		 else*/
-
-			{
-				download_vehicle_no=new Download_vehicle_number(context);
-				url ="http://121.241.125.91/cc/mavyn/online/ownerwiseupdate.php?msg=track"+"&userid="+userid+"&vehicleno=";
-				download_vehicle_no.execute();
+		 super.onCreate(savedInstanceState);
+		 context= getActivity();
+		 initDataset();
+		 points = new ArrayList<LatLng>(100);
+		 lineOptions = new PolylineOptions().width(5).color(Color.GREEN).geodesic(true);
 
 
-
-			}
-
-	      
 	 }
 
 
@@ -144,18 +129,16 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 		vehicle_flag=(LinearLayout)view.findViewById(R.id.vehicle_flag_jrny);
 		vehicle_flag.setVisibility(View.INVISIBLE);
 
-		Spinner spinner = (Spinner)view.findViewById(R.id.trucklist);
+		vehiclelist = (MaterialBetterSpinner) view.findViewById(R.id.vehiclelist);
 
 		pickupaddress=(TextView)view.findViewById(R.id.livepickuppoint);
 		destinationaddress=(TextView)view.findViewById(R.id.livedestinationppoint);
 
-        // temperorly blocked for testing reason
+		spinneradapter = new ArrayAdapter<String>(getActivity(),R.layout.spinnertextbox, vehicle_no_arraylist);
 
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,R.layout.spinnertextbox, vehicle_no_arraylist);
-
-		adapter.setDropDownViewResource(R.layout.spinnertextboxdropdown);
-		spinner.setAdapter(adapter);
-		spinner.setOnItemSelectedListener(this);
+		spinneradapter.setDropDownViewResource(R.layout.spinnertextboxdropdown);
+		vehiclelist.setAdapter(spinneradapter);
+		vehiclelist.setOnItemSelectedListener(this);
      
    
      try {
@@ -173,17 +156,9 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
     public void onActivityCreated(Bundle savedInstanceState) 
     {
        super.onActivityCreated(savedInstanceState);
-       
-      /* sharedpreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
-       userid= sharedpreferences.getString("customer_id", "null");
 
-       */
-		// for polylines
-       
-         points = new ArrayList<LatLng>(100);
-		 lineOptions = new PolylineOptions().width(5).color(Color.GREEN).geodesic(true);
-     
-    }
+
+	}
 
      
    
@@ -218,16 +193,16 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 
 
 
-		   	String vehicle_id=vehicle_id_arraylist.get(position);
+		  String vehicle_no=vehicle_no_arraylist.get(position);
 
 		   // this hit is for gettng source and destination address
-		   url ="http://121.241.125.91/cc/mavyn/online/ownerwiseupdate.php?msg=track"+"&userid="+userid+"&vehicleno="+vehicle_id;
-		   Datadownload Excecute=new Datadownload(context);
+		   url ="http://121.241.125.91/cc/mavyn/online/ownerwiseupdate.php?msg=track"+"&userid="+userid+"&vehicleno="+vehicle_no;
+		   Download_pickup_destination Excecute=new Download_pickup_destination(context);
 		   Excecute.execute(url);
 		   
 		   // this hit is for moving vehicle tracking that is longitute and latitute
-		   url1 ="http://121.241.125.91/cc/mavyn/online/ownerwiseupdate.php?msg=track1"+"&userid="+userid+"&vehicleno="+vehicle_id;
-		   Datadownload1 Excecute1=new Datadownload1(context);
+		   url1 ="http://121.241.125.91/cc/mavyn/online/ownerwiseupdate.php?msg=track1"+"&userid="+userid+"&vehicleno="+vehicle_no;
+		   DownloadPollylines Excecute1=new DownloadPollylines(context);
 		   Excecute1.execute(url1);
 
 		/*  putmarkers("28.4472608","77.49970436");
@@ -237,6 +212,8 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 		    putmarkers("28.41012445","77.51875877");
 		    putmarkers("28.39049429","77.52940178");
 		*/
+
+
 	}
 
 	@Override
@@ -275,18 +252,18 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 
 			vehicle_flag.setVisibility(View.VISIBLE);
 		}*/
-		googleMap.setOnMarkerClickListener(this);
+		googleMap.setOnMarkerClickListener(null);
 
 	}
 
 
-	private class Datadownload extends AsyncTask<String, Void, String>
+	private class Download_pickup_destination extends AsyncTask<String, Void, String>
 	{
 		Context localcontext;
 		private ProgressDialog dialog ;
 		private String local="abc";
 
-		public Datadownload(Context c)
+		public Download_pickup_destination(Context c)
 		{
 			localcontext=c;
 		}
@@ -343,14 +320,7 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 			return local;
 		}
 
-		/*  protected void onCancelled() 
-		  {
-		   dialog.dismiss();
-		   Toast toast = Toast.makeText(localcontext,"Error connecting to Server", Toast.LENGTH_LONG);
-		   toast.setGravity(Gravity.TOP, 25, 400);
-		   toast.show();
-		   }
-	*/
+
 		protected void onPostExecute(String content)
 		{
 			// dialog.dismiss();
@@ -423,13 +393,13 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 	}
 
 
-	private class Datadownload1 extends AsyncTask<String, Void, String>
+	private class DownloadPollylines extends AsyncTask<String, Void, String>
 	{
 		Context localcontext;
 		private ProgressDialog dialog ;
 		private String local="abc";
 
-		public Datadownload1(Context c)
+		public DownloadPollylines(Context c)
 		{
 			localcontext=c;
 		}
@@ -488,15 +458,6 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 
 			return local;
 		}
-
-				/*  protected void onCancelled() 
-				  {
-				   dialog.dismiss();
-				   Toast toast = Toast.makeText(localcontext,"Error connecting to Server", Toast.LENGTH_LONG);
-				   toast.setGravity(Gravity.TOP, 25, 400);
-				   toast.show();
-				   }
-			*/
 
 
 		protected void onPostExecute(String content)
@@ -575,159 +536,91 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 	}
 
 
-	private class Download_vehicle_number extends AsyncTask<String, Void, String>
-	{
-		Context localcontext;
-		private ProgressDialog dialog ;
-		private String local="abc";
-
-		public Download_vehicle_number(Context c)
-		{
-			localcontext=c;
-		}
-
-		protected void onPreExecute()
-		{
-			dialog = new ProgressDialog(localcontext);
-			dialog.setMessage("Getting your data... Please wait...");
-			dialog.show();
-		}
-
-
-		protected String doInBackground(String... urls)
-		{
-
-			BufferedReader bufferinput =null;
-			HttpURLConnection con=null;
-
-			try
-			{
-
-				URL url = new URL(urls[0]);
-				con = (HttpURLConnection) url.openConnection();
-				bufferinput = new BufferedReader(new InputStreamReader((con.getInputStream())));
-				try
-				{
-					local = bufferinput.readLine();
-					System.out.println("json data"+local);
-				}
-				catch (Exception e)
-				{
-
-					System.out.println("json data not fetched");
-				}
-
-				Log.i("Json data received..",local);
-			}
-
-			catch(IOException e)
-			{
-				e.printStackTrace();
-				Log.i("Erro", "data downloading erro");
-
-			}
-
-			try
-			{
-				bufferinput.close();
-			}
-			catch (IOException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			con.disconnect();
-
-			return local;
-		}
-
-				/*  protected void onCancelled()
-				  {
-				   dialog.dismiss();
-				   Toast toast = Toast.makeText(localcontext,"Error connecting to Server", Toast.LENGTH_LONG);
-				   toast.setGravity(Gravity.TOP, 25, 400);
-				   toast.show();
-				   }
-			*/
-
-
-		protected void onPostExecute(String content)
-		{
-			// dialog.dismiss();
-
-			getjson_vehicle_no(content);
-
-			dialog.dismiss();
-		}
-
-	}
-
-
-	private void getjson_vehicle_no(String response){
-
-		JSONObject responseObj;
-		try {
-
-
-			responseObj = new JSONObject(response);
-			JSONArray countryListObj = responseObj.optJSONArray("vehicle_no");  //.getJSONArray("transit");
-
-			int length=countryListObj.length();
-			if (length>0) {
-				to_from.setVisibility(View.VISIBLE);
-
-				vehicle_flag.setVisibility(View.VISIBLE);
-
-			}
-
-			System.out.println("json array length="+length);
-
-			for (int i=0; i<length-1; i++)
-			{
-
-				JSONObject jsonChildNode=countryListObj.getJSONObject(i);
-				String id=null;
-				String vehicle_no=null;
-
-				try
-				{
-
-					id =jsonChildNode.optString("id").toString();
-					vehicle_no = jsonChildNode.optString("vehicle_no").toString();
-				}
-
-				catch (NumberFormatException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-
-				vehicle_no_arraylist.add(vehicle_no);
-				vehicle_id_arraylist.add(id);
-
-				//db.insertContact(id,vehicle_no);
-
-			}
-
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-			System.out.println("Error in reading json object");
-		}
-
-
-	}
-
-
-
 	@Override
 	public boolean onMarkerClick(Marker arg0) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
+
+	private void initDataset() {
+
+		String userid=getActivity().getSharedPreferences("U_id", MODE_PRIVATE).getString("userid", null);
+		String url ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=trackalllist&userid="+userid;
+
+
+
+		StringRequest stringRequest = new StringRequest(Request.Method.GET, url,new Response.Listener<String>() {
+			@Override
+			public void onResponse(String s) {
+
+				Parsejsonvehicle(s);
+
+			}
+		},
+
+				new Response.ErrorListener() {
+					@Override
+					public void onErrorResponse(VolleyError volleyError) {
+
+						volleyError.printStackTrace();
+					}
+
+				})
+		{
+
+
+		};
+
+		RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
+		requestQueue.add(stringRequest);
+
+	}
+
+
+
+	private void Parsejsonvehicle(String response) {
+
+		JSONObject responseObj;
+
+
+		try {
+
+
+			responseObj = new JSONObject(response);
+			JSONArray countryListObj = responseObj.optJSONArray("currentstatus");
+
+			int length = countryListObj.length();
+
+
+			if (length != 0) {
+
+
+
+				for (int i = 0; i < length; i++) {
+
+					JSONObject jsonChildNode = countryListObj.getJSONObject(i);
+					String vehicleno = jsonChildNode.optString("Vehicleno");
+					vehicle_no_arraylist.add(vehicleno);
+
+
+				}
+
+				spinneradapter.notifyDataSetChanged();
+
+			}
+		}
+		catch(JSONException e)
+		{
+			e.printStackTrace();
+			System.out.println("Error in reading json object");
+		}
+
+	}
+
 }
+
+
 
 
 
