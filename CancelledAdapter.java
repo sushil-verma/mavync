@@ -21,10 +21,19 @@ import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import java.util.ArrayList;
 
 
-public class CancelledAdapter extends RecyclerView.Adapter<CancelledAdapter.ViewHolder> {
+public class CancelledAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = "ConfirmAdapter";
+    private static final int EMPTY_VIEW = 10;
     private ArrayList<Transit_record> transit =new ArrayList<>(20);
     private  Context context;
+
+
+    public static class EmptyViewHolder extends RecyclerView.ViewHolder
+    {
+        public EmptyViewHolder(View v){
+            super(v);
+        }
+    }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView myshipment;
@@ -36,14 +45,7 @@ public class CancelledAdapter extends RecyclerView.Adapter<CancelledAdapter.View
 
         public ViewHolder(View v) {
             super(v);
-            // Define click listener for the ViewHolder's View.
-          /*  v.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Element " + getAdapterPosition() + " clicked.");
-                }
-            });
-*/
+
 
             myshipment=(TextView)v.findViewById(R.id.shipmentno1);
             date_time=(TextView)v.findViewById(R.id.booked_datetime);
@@ -87,18 +89,35 @@ public class CancelledAdapter extends RecyclerView.Adapter<CancelledAdapter.View
 
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
 
-        View v = LayoutInflater.from(viewGroup.getContext())
+
+
+        View v;
+
+
+        if (viewType == EMPTY_VIEW) {
+            v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.no_cancelled_booking, viewGroup, false);
+            EmptyViewHolder evh = new EmptyViewHolder(v);
+            return evh;
+        }
+
+
+
+         v = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.text_row_item, viewGroup, false);
 
         return new ViewHolder(v);
     }
 
-
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        Log.d(TAG, "Element " + position + " set.");
+    public void onBindViewHolder(RecyclerView.ViewHolder Holder, int position) {
+
+
+
+        if (Holder instanceof ViewHolder)
+        {
+            ViewHolder viewHolder = (ViewHolder) Holder;
 
 
         viewHolder.date_time().setText(transit.get(position).getDate_time());
@@ -120,27 +139,39 @@ public class CancelledAdapter extends RecyclerView.Adapter<CancelledAdapter.View
                 }
             });
 
-            //viewHolder.driverimage().setImageResource(R.drawable.driver);
 
         }
 
         else
 
-        Glide.with(context).load(transit.get(position).getDriverimg()).asBitmap().centerCrop().into(new BitmapImageViewTarget(viewHolder.driver_image) {
-            @Override
-            protected void setResource(Bitmap resource) {
-                RoundedBitmapDrawable circularBitmapDrawable =
-                        RoundedBitmapDrawableFactory.create(context.getResources(), resource);
-                circularBitmapDrawable.setCircular(true);
-                tempoerimage.setImageDrawable(circularBitmapDrawable);
-            }
-        });
+            Glide.with(context).load(transit.get(position).getDriverimg()).asBitmap().centerCrop().into(new BitmapImageViewTarget(viewHolder.driver_image) {
+                @Override
+                protected void setResource(Bitmap resource) {
+                    RoundedBitmapDrawable circularBitmapDrawable =
+                            RoundedBitmapDrawableFactory.create(context.getResources(), resource);
+                    circularBitmapDrawable.setCircular(true);
+                    tempoerimage.setImageDrawable(circularBitmapDrawable);
+                }
+            });
+        }
 
     }
 
 
+
+
+
     @Override
     public int getItemCount() {
-        return transit.size();
+        return transit.size() > 0 ? transit.size() : 1;
+    }
+
+
+    @Override
+    public int getItemViewType(int position) {
+        if (transit.size() == 0) {
+            return EMPTY_VIEW;
+        }
+        return super.getItemViewType(position);
     }
 }

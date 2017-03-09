@@ -46,6 +46,8 @@ public class Confirmfreg extends Fragment {
         localuserid=userid.getString("userid","null");
         String url ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=Confirm"+"&userid="+localuserid;
         downloaddata(url);
+
+
     }
 
     @Override
@@ -60,6 +62,7 @@ public class Confirmfreg extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new ConfirmAdapter(getActivity(),transit);
         mRecyclerView.setAdapter(mAdapter);
+
 
 
         mRecyclerView.addOnItemTouchListener(
@@ -132,17 +135,8 @@ public class Confirmfreg extends Fragment {
             responseObj = new JSONObject(response);
             JSONArray countryListObj = responseObj.optJSONArray("transit");  //.getJSONArray("transit");
 
-            int length=countryListObj.length();
 
-            System.out.println("json array length="+length);
-
-
-            if(!transit.isEmpty())
-            {
-                transit.removeAll(transit);
-            }
-
-            for (int i=0; i<length; i++)
+            for (int i=0; i<countryListObj.length(); i++)
             {
 
                 JSONObject jsonChildNode=countryListObj.getJSONObject(i);
@@ -155,6 +149,8 @@ public class Confirmfreg extends Fragment {
                 Transit_record tempclass = new Transit_record(Date_time,truck_type,from,to,shipmentNo,"http://121.241.125.91/cc/mavyn/online/"+driverimg);
                 transit.add(tempclass);
             }
+
+
 
             mAdapter.notifyDataSetChanged();
 

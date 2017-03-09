@@ -68,7 +68,7 @@ public class TrackJourney extends Fragment {
         {
             switch (position){
                 case 0 : return new TrackJourneyfreg();
-                case 1 : return new Trackinglistviewfreg();
+                case 1 : return new TrackingJourneylistviewfreg();
 
             }
             return null;

@@ -12,12 +12,12 @@ class Tracklistdataclass{
     String driver_name=null;
     String driver_image_url=null;
 
-    public Tracklistdataclass(String vehicleno,String address,String drivername,String driverimage ) {
+    public Tracklistdataclass(String vehicleno,String address,String drivername,String vehicleimage ) {
 
         vehicle_number=vehicleno;
         vehicle_description=address;
         driver_name=drivername;
-        driver_image_url=driverimage;
+        driver_image_url=vehicleimage;
     }
 
     public String getVehicle_number() {

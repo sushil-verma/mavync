@@ -51,11 +51,11 @@ import org.json.JSONObject;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class Trackingmapview extends Fragment implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class Trackingmapview extends Fragment implements OnMapReadyCallback {
     private View view;
     MapView mMapView;
     private GoogleMap googleMap;
-    private GoogleApiClient mGoogleApiClient;
+
     private Download_Vehicle hit_vehicle;
     private Marker driver_marker;
     private Location location;
@@ -72,7 +72,7 @@ public class Trackingmapview extends Fragment implements OnMapReadyCallback, Goo
     @Override
     public void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
+
     }
 
     @Override
@@ -88,19 +88,9 @@ public class Trackingmapview extends Fragment implements OnMapReadyCallback, Goo
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
         mMarkersHashMap = new HashMap<Marker, MyMarker>();
-/*
-        SharedPreferences userid = getActivity().getSharedPreferences("U_id", MODE_PRIVATE);
-        String customer_id = userid.getString("userid", null);*/
-
         hit_vehicle = new Download_Vehicle(getActivity());
         hit_vehicle.execute("http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=trackall&userid="+getActivity().getSharedPreferences("U_id", MODE_PRIVATE).getString("userid", null));
-
 
     }
 
@@ -120,8 +110,6 @@ public class Trackingmapview extends Fragment implements OnMapReadyCallback, Goo
         }
 
         mMapView.getMapAsync(this);
-
-
         return view;
 
 
@@ -138,6 +126,13 @@ public class Trackingmapview extends Fragment implements OnMapReadyCallback, Goo
     public void onMapReady(GoogleMap gMap) {
 
         googleMap = gMap;
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            public boolean onMarkerClick(Marker arg0)
+            {
+                 arg0.showInfoWindow();
+                 return true;
+            }
+        });
 
         if (mMarkersHashMap.isEmpty()) {
 
@@ -324,50 +319,6 @@ public class Trackingmapview extends Fragment implements OnMapReadyCallback, Goo
         }
     }
 
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-
-        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-
-        if (location != null) {
-
-
-            longitude=location.getLongitude();
-            latitude= location.getLatitude();
-            //latlong=new LatLng(latitude, longitude);
-           /* LocationAddress locationAddress = new LocationAddress();
-            locationAddress.getAddressFromLocation(latitude,longitude,getActivity(), new GeocoderHandler());*/
-            LatLng temp_latlong_local=new LatLng(latitude,longitude);
-            CameraPosition cameraPosition = new CameraPosition.Builder().target(temp_latlong_local).zoom(9.0f).build();
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
-            googleMap.moveCamera(cameraUpdate);
-
-        }
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-
     @Override
     public void onResume() {
         super.onResume();
@@ -391,7 +342,6 @@ public class Trackingmapview extends Fragment implements OnMapReadyCallback, Goo
         super.onLowMemory();
         mMapView.onLowMemory();
     }
-
 
 
  

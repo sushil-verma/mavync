@@ -69,12 +69,6 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
     private Timer timer;
     private mycallable callab;
     private Thread callabtask;
-
-
-    // profile variable
-
-    // variable for the profile module
-
     public static final String MyPREFERENCES = "MyPrefs" ;
     private String userid=null;
     private String Imagelinkurl=null;
@@ -88,7 +82,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
     private static volatile int x=1;
     private   Imageurl_download_thread imageurl_with_data;
     private SharedPreferences shipper_data;
-    // private SharedPreferences.Editor editor;
+
     private static volatile boolean profile_pics_changed=false;
     private  Hit_image1 hitimage1;
 
@@ -102,16 +96,16 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
         setupActionBar();
 
         shipper_data=getSharedPreferences("profiledata",MODE_PRIVATE);
-
         editor=shipper_data.edit();
+
 
 
 
         intent=new Intent(this,HomeActivity.class);
         mobileno = (AutoCompleteTextView) findViewById(R.id.mobileno);
         mPasswordView = (EditText) findViewById(R.id.password);
-        terms_conditn=(TextView)findViewById(R.id.login_tc) ;
-        forgetpass=(TextView)findViewById(R.id.forgetpass) ;
+       // terms_conditn=(TextView)findViewById(R.id.login_tc) ;
+       // forgetpass=(TextView)findViewById(R.id.forgetpass) ;
 
         Button SignInButton = (Button) findViewById(R.id.sign_in_button);
         SignInButton.setOnClickListener(new OnClickListener() {
@@ -123,10 +117,10 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        writestateToInternalStorage();
 
-        terms_conditn.setOnClickListener(this);
-        forgetpass.setOnClickListener(this);
+
+       /* terms_conditn.setOnClickListener(this);
+        forgetpass.setOnClickListener(this);*/
 
     }
 
@@ -178,7 +172,8 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
             focusView.requestFocus();
         } else {
 
-            showProgress(true);
+            mProgressView.setVisibility(View.VISIBLE);
+            //showProgress(true);
 
             InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(mobileno.getWindowToken(), 0);
@@ -247,12 +242,12 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
     public void onClick(View view) {
         switch (view.getId())
         {
-            case R.id.login_tc:
+           /* case R.id.login_tc:
 
                             break;
             case R.id.forgetpass:
-
-                           break;
+*/
+                           //break;
         }
     }
 
@@ -297,9 +292,10 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
             mProgressView.setVisibility(View.INVISIBLE);
             if (success) {
 
-
+                writestateToInternalStorage();
                 if(!RatingHit())
                 {
+                    startService(new Intent(getApplicationContext(),Confrimvehicledownloadservice.class));
                     startActivity(intent);
                 }
 
@@ -310,6 +306,8 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
             }
+
+            mProgressView.setVisibility(View.INVISIBLE);
         }
 
         @Override
@@ -327,14 +325,18 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
         private String mobile_no;
         private String password;
         private String url;
+        private HttpURLConnection con=null;
+        private BufferedReader bufferinput =null;
+        private JSONObject responseObj;
 
         public String getMyuserid() {
             return myuserid;
         }
-
         public int getMyuser_status() {
             return myuser_status;
         }
+
+
 
         public hit_server(String mob,String pass)
         {
@@ -342,10 +344,6 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
             password=pass;
             url ="http://121.241.125.91/cc/mavyn/online/customerlogin.php?username="+mobile_no+"&password="+password;
         }
-
-
-        private BufferedReader bufferinput =null;
-        private HttpURLConnection con=null;
 
 
         @Override
@@ -356,42 +354,13 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
             {
 
                 URL urll = new URL(url);
-
                 con = (HttpURLConnection) urll.openConnection();
                 bufferinput = new BufferedReader(new InputStreamReader((con.getInputStream())));
-                try
-                {
-                    local = bufferinput.readLine();
-                    System.out.println("json data"+local);
-                }
-                catch (IOException e)
-                {
-                    // TODO Auto-generated catch block
-                    System.out.println("json data not fetched");
-                }
-
-
-
-            }
-            catch(IOException e)
-            {
-                e.printStackTrace();
-                Log.i("Erro", "data downloading erro");
-
-            }
-
-
-
-            JSONObject responseObj;
-            try {
-
-
+                local = bufferinput.readLine();
+                System.out.println("json data"+local);
                 responseObj = new JSONObject(local);
                 JSONArray countryListObj = responseObj.optJSONArray("loginstatus");  //.getJSONArray("transit");
-
                 int length=countryListObj.length();
-
-                System.out.println("json array length="+length);
 
                 for (int i=0; i<length; i++)
                 {
@@ -410,30 +379,27 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
 
                         downloadprofiledata(myuserid);
 
-
-
                     }
 
                 }
 
+                bufferinput.close();
+                con.disconnect();
+
             }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+                Log.i("Erro", "data downloading erro");
+
+            }
+
             catch (JSONException e)
             {
                 e.printStackTrace();
                 System.out.println("Error in reading json object");
             }
 
-            try
-            {
-                bufferinput.close();
-            }
-            catch (IOException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-            con.disconnect();
         }
 
     }
@@ -442,7 +408,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
     {
 
 
-        Imagelinkurl="http://121.241.125.91/cc/mavyn/online/mobileimage?msg="+userid;
+        Imagelinkurl="http://121.241.125.91/cc/mavyn/online/shipperprofile?msg="+userid;
         imageurl_with_data=new Imageurl_download_thread(Imagelinkurl);
         Thread t= new Thread(imageurl_with_data);
         t.start();
@@ -509,15 +475,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
 
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 
-
-                //urlConnection.connect();
-
-                try {
-                    iStream = urlConnection.getInputStream();
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                iStream = urlConnection.getInputStream();
 
                 if(iStream!=null)
 
@@ -532,6 +490,9 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
             catch(Exception e)
             {
                 Log.d("Exception downloading", e.toString());
+
+                bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.id09);
+                saveImageToInternalStorage(bitmap);
             }
 
         }
@@ -546,50 +507,11 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
         private volatile String acc_no;
         private volatile String ifccode_temp;
         private volatile String bank_name;
-
-
         private final String localurl;
         private JSONObject jsonResponse;
-
-
         public String getImageurl_received_local() {
             return imageurl_received_local;
         }
-
-
-
-        /*public String getFirst_name() {
-            return first_name;
-        }
-
-
-
-        public String getEmail() {
-            return email_temp;
-        }
-
-
-        public String getMobileno() {
-            return Mobileno;
-        }
-
-
-
-        public String getAcc_no() {
-            return acc_no;
-        }
-
-
-        public String getIfccode() {
-            return ifccode_temp;
-        }
-
-
-
-        public String getbank_name() {
-            return bank_name;
-        }*/
-
 
 
         public Imageurl_download_thread(final String localString)
@@ -630,12 +552,12 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
 
                         JSONObject jsonChildNode = jsonMainNode.getJSONObject(0);
                         imageurl_received_local=jsonChildNode.optString("imageurl").toString();
-                        first_name =jsonChildNode.optString("name");
+                        first_name =jsonChildNode.optString("firstname");
                         email_temp=jsonChildNode.optString("email");
-                        Mobileno = jsonChildNode.optString("mobile");
-                        bank_name = jsonChildNode.optString("bankname");
+                        Mobileno = jsonChildNode.optString("mobileno");
+                        bank_name = jsonChildNode.optString("Bankname");
                         ifccode_temp=jsonChildNode.optString("IFSC");
-                        acc_no=jsonChildNode.optString("accountno");
+                        acc_no=jsonChildNode.optString("Accountno");
 
 
                     } catch (JSONException e) {
@@ -659,8 +581,8 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
 
                         else
                         {
-                            saved_url=ReadulrFromInternalStorage();
-                            if(!saved_url.equals(imageurl_received_local))
+
+                            if(!previous_url_Received.equals(imageurl_received_local))
                             {
                                 writeUrl_addressToInternalStorage(imageurl_received_local);
 
@@ -670,7 +592,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
 
                         }
 
-                        if(previous_url_Received==null || !saved_url.equals(imageurl_received_local)) {
+                        if(previous_url_Received==null || !previous_url_Received.equals(imageurl_received_local)) {
 
                             editor.putString("first_name", first_name);
                             editor.putString("email_temp", email_temp);
@@ -688,7 +610,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
             }
             catch(Exception e)
             {
-                // Toast.makeText(getActivity()," Server Error ",Toast.LENGTH_LONG).show();
+                e.printStackTrace();
             }
         }
 
@@ -720,7 +642,6 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
         try {
 
             FileOutputStream fos = openFileOutput("url1.txt", Context.MODE_PRIVATE);
-
             fos.write(test.getBytes());
             fos.close();
 
@@ -749,7 +670,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
         }catch(IOException e)
         {
             e.printStackTrace();
-            return null;
+            return urllocal;
         }
 
         return urllocal;
@@ -912,12 +833,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
 
                 try {
                     jsonResponse = new JSONObject(local);
-
                     JSONArray jsonMainNode=jsonResponse.optJSONArray("ratingpending");
-
-
-
-
                     JSONObject jsonChildNode = jsonMainNode.getJSONObject(0);
 
 

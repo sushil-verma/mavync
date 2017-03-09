@@ -27,9 +27,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -37,6 +39,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.android.volley.Request;
@@ -64,7 +67,7 @@ import com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener, OnItemSelectedListener, OnMarkerClickListener {
+public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener,  OnMarkerClickListener {
 
    private Context context;
    private Confirmd_Dbhlper db;
@@ -76,9 +79,7 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
    private List<String>  vehicle_id_arraylist=new ArrayList<String>();
    private TextView pickupaddress,destinationaddress;
    private Marker driver_marker;
-   private SharedPreferences sharedpreferences;
-   private SharedPreferences.Editor editor;
-   public static final String MyPREFERENCES = "MyPrefs" ;
+
    private String userid=null;
    private String url;  // this is for source and destination bullo n url
    private String url1; // this is for all lat long of moving vehicle
@@ -93,14 +94,19 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
    private	PolylineOptions lineOptions = null;
 	private static volatile MaterialBetterSpinner vehiclelist;
 	private ArrayAdapter<String> spinneradapter;
-
+     private Confirm_vehicle_no_Db vehiclenodatabase=null;
+	public static final String MyPREFERENCES = "U_id" ;
 
 	 @Override
 	    public void onCreate(Bundle savedInstanceState) 
 	 {
 		 super.onCreate(savedInstanceState);
 		 context= getActivity();
-		 initDataset();
+
+		 vehiclenodatabase=new Confirm_vehicle_no_Db(getActivity());
+
+		 vehicle_no_arraylist.addAll(vehiclenodatabase.getAlldata());
+
 		 points = new ArrayList<LatLng>(100);
 		 lineOptions = new PolylineOptions().width(5).color(Color.GREEN).geodesic(true);
 
@@ -122,14 +128,22 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 		// comment on 12/1/2016
 
 		to_from=(LinearLayout)view.findViewById(R.id.to_from);
-		to_from.setVisibility(View.INVISIBLE);
+		//to_from.setVisibility(View.INVISIBLE);
 
 
 
 		vehicle_flag=(LinearLayout)view.findViewById(R.id.vehicle_flag_jrny);
-		vehicle_flag.setVisibility(View.INVISIBLE);
+
+
 
 		vehiclelist = (MaterialBetterSpinner) view.findViewById(R.id.vehiclelist);
+		if(vehicle_no_arraylist.size()<=0) {
+			vehicle_flag.setVisibility(View.VISIBLE);
+			vehiclelist.setVisibility(View.INVISIBLE);
+		  }
+		else
+			vehicle_flag.setVisibility(View.INVISIBLE);
+
 
 		pickupaddress=(TextView)view.findViewById(R.id.livepickuppoint);
 		destinationaddress=(TextView)view.findViewById(R.id.livedestinationppoint);
@@ -138,7 +152,27 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 
 		spinneradapter.setDropDownViewResource(R.layout.spinnertextboxdropdown);
 		vehiclelist.setAdapter(spinneradapter);
-		vehiclelist.setOnItemSelectedListener(this);
+		vehiclelist.setHint("Select vehicle");
+
+		vehiclelist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+
+				String vehicle_no=vehicle_no_arraylist.get(arg2);
+
+				// this hit is for gettng source and destination address
+				url ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=track"+"&userid="+getActivity().getSharedPreferences(MyPREFERENCES,SplasScreen.MODE_PRIVATE).getString("userid", "null") +"&vehicleno="+vehicle_no;
+				Download_pickup_destination Excecute=new Download_pickup_destination(context);
+				Excecute.execute(url);
+
+				// this hit is for moving vehicle tracking that is longitute and latitute
+				url1 ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=track1"+"&userid="+getActivity().getSharedPreferences(MyPREFERENCES,SplasScreen.MODE_PRIVATE).getString("userid", "null")+"&vehicleno="+vehicle_no;
+				DownloadPollylines Excecute1=new DownloadPollylines(context);
+				Excecute1.execute(url1);
+
+			}
+		});
+
      
    
      try {
@@ -156,14 +190,8 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
     public void onActivityCreated(Bundle savedInstanceState) 
     {
        super.onActivityCreated(savedInstanceState);
-
-
 	}
 
-     
-   
-    
-    
     @Override
     public void onResume() {
         super.onResume();
@@ -183,12 +211,11 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
     }
 
     @Override
-    public void onLowMemory() {
-        super.onLowMemory();
+    public void onLowMemory() {        super.onLowMemory();
         mMapView.onLowMemory();
     }
 
-	@Override
+	/*@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position,long id) {
 
 
@@ -196,32 +223,26 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 		  String vehicle_no=vehicle_no_arraylist.get(position);
 
 		   // this hit is for gettng source and destination address
-		   url ="http://121.241.125.91/cc/mavyn/online/ownerwiseupdate.php?msg=track"+"&userid="+userid+"&vehicleno="+vehicle_no;
+		   url ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=track"+"&userid="+userid+"&vehicleno="+vehicle_no;
 		   Download_pickup_destination Excecute=new Download_pickup_destination(context);
 		   Excecute.execute(url);
 		   
 		   // this hit is for moving vehicle tracking that is longitute and latitute
-		   url1 ="http://121.241.125.91/cc/mavyn/online/ownerwiseupdate.php?msg=track1"+"&userid="+userid+"&vehicleno="+vehicle_no;
+		   url1 ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=track1"+"&userid="+userid+"&vehicleno="+vehicle_no;
 		   DownloadPollylines Excecute1=new DownloadPollylines(context);
 		   Excecute1.execute(url1);
 
-		/*  putmarkers("28.4472608","77.49970436");
+		*//*  putmarkers("28.4472608","77.49970436");
 		    putmarkers("28.43895909","77.50451088");
 		    putmarkers("28.43126056","77.50880241");
 		    putmarkers("28.42250468","77.51395226");
 		    putmarkers("28.41012445","77.51875877");
 		    putmarkers("28.39049429","77.52940178");
-		*/
+		*//*
 
 
-	}
+	}*/
 
-	@Override
-	public void onNothingSelected(AdapterView<?> parent) 
-	{
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public void onConnected(@Nullable Bundle bundle) {
@@ -244,14 +265,6 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 		googleMap=gMap;
 
 
-		// commented on 12/1/17
-
-	/*	if(vehicle_id_arraylist.size()==0)
-
-		{
-
-			vehicle_flag.setVisibility(View.VISIBLE);
-		}*/
 		googleMap.setOnMarkerClickListener(null);
 
 	}
@@ -336,6 +349,8 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 	private void displayCountryList(String response){
 
 		JSONObject responseObj;
+		double destination_latitute=0.0;
+		double destination_longitute=0.0;
 
 
 		try {
@@ -346,42 +361,55 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 
 			int length=countryListObj.length();
 
-			System.out.println("json array length="+length);
-
-			for (int i=0; i<length; i++)
+			if(length>0)
 			{
 
-				JSONObject jsonChildNode=countryListObj.getJSONObject(i);
+				/*to_from.setVisibility(View.VISIBLE);
 
-				String myaddress=jsonChildNode.optString("address").toString();
-				double destination_latitute=0.0;
-				double destination_longitute=0.0;
-				try {
-					destination_latitute = Double.valueOf(jsonChildNode.optString("lat").toString());
-					destination_longitute = Double.valueOf(jsonChildNode.optString("long").toString());
-				} catch (NumberFormatException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-				if(i==0)
+				vehicle_flag.setVisibility(View.VISIBLE);
+*/
+				for (int i=0; i<length; i++)
 				{
 
-					pickupaddress.setText(myaddress) ;
-					driver_marker= googleMap.addMarker(new MarkerOptions().position(new LatLng(destination_latitute,destination_longitute)).icon(BitmapDescriptorFactory.fromResource(R.drawable.gbaloon)));
+					JSONObject jsonChildNode=countryListObj.getJSONObject(i);
 
-					source_lat=destination_latitute;
-					source_long=destination_longitute;
+					String myaddress=jsonChildNode.optString("address").toString();
+
+					try {
+						destination_latitute = Double.valueOf(jsonChildNode.optString("lat").toString());
+						destination_longitute = Double.valueOf(jsonChildNode.optString("long").toString());
+					} catch (NumberFormatException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+					if(i==0)
+					{
+
+						pickupaddress.setText(myaddress) ;
+						driver_marker= googleMap.addMarker(new MarkerOptions().position(new LatLng(destination_latitute,destination_longitute)).icon(BitmapDescriptorFactory.fromResource(R.drawable.gbaloon)));
+
+						source_lat=destination_latitute;
+						source_long=destination_longitute;
+					}
+					else
+					{
+
+						destinationaddress.setText(myaddress);
+						driver_marker= googleMap.addMarker(new MarkerOptions().position(new LatLng(destination_latitute,destination_longitute)).icon(BitmapDescriptorFactory.fromResource(R.drawable.rbaloon)));
+
+					}
+
 				}
-				else
-				{
 
-					destinationaddress.setText(myaddress);
-					driver_marker= googleMap.addMarker(new MarkerOptions().position(new LatLng(destination_latitute,destination_longitute)).icon(BitmapDescriptorFactory.fromResource(R.drawable.rbaloon)));
+				CameraPosition cameraPosition = new CameraPosition.Builder().target(new LatLng(destination_latitute,destination_longitute)).zoom(10.0f).build();
+				CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+				googleMap.moveCamera(cameraUpdate);
 
-				}
 
 			}
+
+
 
 		}
 		catch (JSONException e)
@@ -489,42 +517,43 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 			int length=countryListObj.length();
 			int x=length-1;
 
-			System.out.println("json array length="+length);
-
-			for (int i=0; i<length-1; i++)
+			if(x>0)
 			{
-				JSONObject jsonChildNode=countryListObj.getJSONObject(i);
-				double destination_latitute=0.0;
-				double destination_longitute=0.0;
-				String address=null;
-				String date_time=null;
-				try {
 
+				for (int i=0; i<length-1; i++)
+				{
+					JSONObject jsonChildNode=countryListObj.getJSONObject(i);
+					double destination_latitute=0.0;
+					double destination_longitute=0.0;
+					String address=null;
+					String date_time=null;
 					destination_latitute = Double.valueOf(jsonChildNode.optString("lat").toString());
 					destination_longitute = Double.valueOf(jsonChildNode.optString("long").toString());
+					templatlng1=new LatLng(destination_latitute,destination_longitute);
+					points.add(templatlng1);
+
 				}
+				/*points.add(new LatLng(28.4472608,77.49970436));
+				points.add(new LatLng(28.43895909,77.50451088));
+				points.add(new LatLng(28.43126056,77.50880241));
+				points.add(new LatLng(28.42250468,77.51395226));
+				points.add(new LatLng(28.41012445,77.51875877));
+				points.add(new LatLng(28.39049429,77.52940178));
+*/
 
-				catch (NumberFormatException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			
-				templatlng1=new LatLng(destination_latitute,destination_longitute);
-				points.add(templatlng1);
 
-			}
-
-			try {
 				lineOptions.addAll(points);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				googleMap.addPolyline(lineOptions);
+				driver_marker= googleMap.addMarker(new MarkerOptions().position(templatlng1).icon(BitmapDescriptorFactory.fromResource(R.drawable.maptruck)));
+				CameraPosition cameraPosition = new CameraPosition.Builder().target(templatlng1).zoom(10.0f).build();
+				CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+				googleMap.moveCamera(cameraUpdate);
+
 			}
-			googleMap.addPolyline(lineOptions);
-			driver_marker= googleMap.addMarker(new MarkerOptions().position(templatlng1).icon(BitmapDescriptorFactory.fromResource(R.drawable.maptruck)));
-			CameraPosition cameraPosition = new CameraPosition.Builder().target(templatlng1).zoom(13.0f).build();
-			CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
-			googleMap.moveCamera(cameraUpdate);
+
+
+
+
 
 		}
 		catch (JSONException e)
@@ -543,7 +572,7 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 	}
 
 
-	private void initDataset() {
+	/*private void initDataset() {
 
 		String userid=getActivity().getSharedPreferences("U_id", MODE_PRIVATE).getString("userid", null);
 		String url ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=trackalllist&userid="+userid;
@@ -575,11 +604,11 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 		RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
 		requestQueue.add(stringRequest);
 
-	}
+	}*/
 
 
 
-	private void Parsejsonvehicle(String response) {
+	/*private void Parsejsonvehicle(String response) {
 
 		JSONObject responseObj;
 
@@ -616,7 +645,7 @@ public class TrackJourneyfreg extends Fragment implements OnMapReadyCallback,Goo
 			System.out.println("Error in reading json object");
 		}
 
-	}
+	}*/
 
 }
 

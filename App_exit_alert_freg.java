@@ -49,7 +49,7 @@ public  class App_exit_alert_freg extends DialogFragment {
                             public void onClick(DialogInterface dialog, int whichButton) {
 
 
-                                ((HomeActivity)getActivity()).doPositiveClick();
+                                getActivity().finish();
                             }
                         }
                 )

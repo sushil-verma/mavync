@@ -17,6 +17,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -41,13 +42,15 @@ import java.util.ArrayList;
 public class Deliveredfreg extends Fragment {
 
     private static final String TAG = "RecyclerViewFragment";
-    private  LayoutInflater inflater;
+
     private View layout;
     protected RecyclerView mRecyclerView;
     protected DeliveredAdapter mAdapter;
+
     protected RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<Transit_record> transit=new ArrayList<Transit_record>(20);
     private   String localuserid=null;
+    private ProgressDialog mydialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -57,6 +60,9 @@ public class Deliveredfreg extends Fragment {
         localuserid=userid.getString("userid","null");
         String url ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=Delivered"+"&userid="+localuserid;
         downloaddata(url);
+        mydialog=new ProgressDialog(getActivity());
+        mydialog.setMessage("Please wait...");
+        mydialog.show();
        /* inflater = getActivity().getLayoutInflater();
         layout = inflater.inflate(R.layout.toast_layout,(ViewGroup)getActivity().findViewById((R.id.custom_toast_container)));*/
     }
@@ -71,6 +77,7 @@ public class Deliveredfreg extends Fragment {
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new DeliveredAdapter(getActivity(),transit);
+
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(getActivity(), mRecyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
@@ -81,8 +88,6 @@ public class Deliveredfreg extends Fragment {
                         intent.putExtra("shipment_id", shipment_id);
                         intent.putExtra("user_id",localuserid);
                         startActivity(intent);
-
-
 
                     }
 
@@ -104,6 +109,8 @@ public class Deliveredfreg extends Fragment {
             @Override
             public void onResponse(String s) {
 
+                mydialog.dismiss();
+
                 displayCountryList(s);
 
             }
@@ -113,6 +120,7 @@ public class Deliveredfreg extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError volleyError) {
 
+                        mydialog.dismiss();
                         volleyError.printStackTrace();
                     }
 
@@ -139,14 +147,6 @@ public class Deliveredfreg extends Fragment {
             JSONArray countryListObj = responseObj.optJSONArray("transit");
 
             int length=countryListObj.length();
-
-            if(length==0)
-            {
-                Toast toast = Toast.makeText(getActivity(), "No Data Available.", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.setView(layout);
-               // toast.show();
-            }
 
 
             System.out.println("json array length="+length);

@@ -1,10 +1,9 @@
 package com.example.sushilverma.mavync;
 
-/**
- * Created by sushil.verma on 11/15/2016.
- */
+
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -32,38 +31,24 @@ import java.util.ArrayList;
 
 public class Ratingfreg extends Fragment {
 
-    private static final String TAG = "RecyclerViewFragment";
-    private static final String KEY_LAYOUT_MANAGER = "layoutManager";
-    private static final int SPAN_COUNT = 2;
-    private static final int DATASET_COUNT = 60;
+    private static final String TAG = "RatingFragment";
     private  LayoutInflater inflater;
     private View layout;
-
-
-    private enum LayoutManagerType {
-        GRID_LAYOUT_MANAGER,
-        LINEAR_LAYOUT_MANAGER
-    }
-
-    protected LayoutManagerType mCurrentLayoutManagerType;
-
-
     protected RecyclerView mRecyclerView;
     protected Ratingadapter mAdapter;
     protected RecyclerView.LayoutManager mLayoutManager;
-    protected String[] mDataset;
-    private ArrayList<Transit_record> transit=new ArrayList<Transit_record>(20);
+
+    private ArrayList<Ratingt_report_class> transit;
+    private  String localuserid;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
-
-        // Initialize dataset, this data would usually come from a local content provider or
-        // remote server.
+        transit=new ArrayList<Ratingt_report_class>(20);
+       // Ratingt_report_class tempclass=new Ratingt_report_class("tyety","sfj","delhi","local",123,"http://121.241.125.91/cc/mavyn/online/","2.0","2.0");
+      //  transit.add(tempclass);
         initDataset();
-        inflater = getActivity().getLayoutInflater();
-        layout = inflater.inflate(R.layout.toast_layout,(ViewGroup)getActivity().findViewById((R.id.custom_toast_container)));
-
     }
 
     @Override
@@ -71,25 +56,10 @@ public class Ratingfreg extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.recycler_view_frag, container, false);
         rootView.setTag(TAG);
-
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
-
-        // LinearLayoutManager is used here, this will layout the elements in a similar fashion
-        // to the way ListView would layout elements. The RecyclerView.LayoutManager defines how
-        // elements are laid out.
         mLayoutManager = new LinearLayoutManager(getActivity());
-
-        mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
-
-        if (savedInstanceState != null) {
-            // Restore saved layout manager type.
-            mCurrentLayoutManagerType = (LayoutManagerType) savedInstanceState
-                    .getSerializable(KEY_LAYOUT_MANAGER);
-        }
-        setRecyclerViewLayoutManager(mCurrentLayoutManagerType);
-
-        mAdapter = new Ratingadapter(transit);
-        // Set CustomAdapter as the adapter for RecyclerView.
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new Ratingadapter(transit,getActivity());
         mRecyclerView.setAdapter(mAdapter);
 
 
@@ -97,74 +67,32 @@ public class Ratingfreg extends Fragment {
                 new RecyclerItemClickListener(getActivity(), mRecyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
 
-                        int  shipment_id=transit.get(position).getshipmentNo();
+                       /* int  shipment_id=transit.get(position).getshipmentNo();
                         Intent intent=new Intent(getActivity(),ConfirmDetail.class);
                         intent.putExtra("shipment_id", shipment_id);
                         startActivity(intent);
-
-
-
+*/
                     }
 
                     @Override public void onLongItemClick(View view, int position) {
-                        // do whatever
+
                     }
                 })
         );
 
-        if(mAdapter.getItemCount()==0)
-            rootView = inflater.inflate(R.layout.no_data_availble, container, false);
-
         return rootView;
     }
 
-    /**
-     * Set RecyclerView's LayoutManager to the one given.
-     *
-     * @param layoutManagerType Type of layout manager to switch to.
-     */
-    public void setRecyclerViewLayoutManager(LayoutManagerType layoutManagerType) {
-        int scrollPosition = 0;
-
-        // If a layout manager has already been set, get current scroll position.
-        if (mRecyclerView.getLayoutManager() != null) {
-            scrollPosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager())
-                    .findFirstCompletelyVisibleItemPosition();
-        }
-
-        switch (layoutManagerType) {
-            case GRID_LAYOUT_MANAGER:
-                mLayoutManager = new GridLayoutManager(getActivity(), SPAN_COUNT);
-                mCurrentLayoutManagerType = LayoutManagerType.GRID_LAYOUT_MANAGER;
-                break;
-            case LINEAR_LAYOUT_MANAGER:
-                mLayoutManager = new LinearLayoutManager(getActivity());
-                mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
-                break;
-            default:
-                mLayoutManager = new LinearLayoutManager(getActivity());
-                mCurrentLayoutManagerType = LayoutManagerType.LINEAR_LAYOUT_MANAGER;
-        }
-
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.scrollToPosition(scrollPosition);
 
 
-    }
 
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        // Save currently selected layout manager.
-        savedInstanceState.putSerializable(KEY_LAYOUT_MANAGER, mCurrentLayoutManagerType);
-        super.onSaveInstanceState(savedInstanceState);
-    }
 
-    /**
-     * Generates Strings for RecyclerView's adapter. This data would usually come
-     * from a local content provider or remote server.
-     */
+
     private void initDataset() {
-        String url ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=Confirm"+"&userid="+42;
+
+        SharedPreferences userid=getActivity().getSharedPreferences("U_id",getActivity().MODE_PRIVATE);
+        localuserid=userid.getString("userid","null");
+        String url ="http://121.241.125.91/cc/mavyn/online/customerloginafter.php?massg=ratingreport"+"&userid="+localuserid;
         GrabURL Excecute=new GrabURL();
         Excecute.execute(url);
     }
@@ -174,11 +102,8 @@ public class Ratingfreg extends Fragment {
     {
 
         private String content =  null;
-        private boolean error = false;
         private ProgressDialog dialog = new ProgressDialog(getActivity());
-
         private Transit_record  temprary_record;
-
         private volatile String Date_Time=null;
         private volatile String Truck_type=null;
         private volatile String From=null;
@@ -197,7 +122,7 @@ public class Ratingfreg extends Fragment {
         protected String doInBackground(String... urls)
         {
 
-            // String URL = null;
+
             BufferedReader bufferinput =null;
             HttpURLConnection con=null;
 
@@ -205,57 +130,26 @@ public class Ratingfreg extends Fragment {
             {
 
                 URL url = new URL(urls[0]);
-                System.out.println(urls[0]);
-                System.out.println("data hit");
                 con = (HttpURLConnection) url.openConnection();
                 bufferinput = new BufferedReader(new InputStreamReader((con.getInputStream())));
-                try
-                {
-                    local = bufferinput.readLine();
-                    System.out.println("json data"+local);
-                }
-                catch (Exception e)
-                {
-                    // TODO Auto-generated catch block
-                    System.out.println("json data not fetched");
-                }
-                Log.i("Json data received..",local);
-
+                local = bufferinput.readLine();
+                bufferinput.close();
+                con.disconnect();
 
             }
             catch(IOException e)
             {
                 e.printStackTrace();
-                Log.i("Erro", "data downloading erro");
 
             }
-
-            try
-            {
-                bufferinput.close();
-            }
-            catch (IOException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            con.disconnect();
 
             return local;
 
         }
 
-        /*  protected void onCancelled()
-          {
-           dialog.dismiss();
-           Toast toast = Toast.makeText(localcontext,"Error connecting to Server", Toast.LENGTH_LONG);
-           toast.setGravity(Gravity.TOP, 25, 400);
-           toast.show();
-           }
-    */
+
         protected void onPostExecute(String content)
         {
-            // dialog.dismiss();
 
             displayCountryList(content);
 
@@ -273,25 +167,9 @@ public class Ratingfreg extends Fragment {
 
 
             responseObj = new JSONObject(response);
-            JSONArray countryListObj = responseObj.optJSONArray("transit");  //.getJSONArray("transit");
-
+            JSONArray countryListObj = responseObj.optJSONArray("transit");
             int length=countryListObj.length();
 
-           /* if(length==0)
-            {
-                Toast toast = Toast.makeText(getActivity(), "No Data Available.", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.setView(layout);
-                toast.show();
-            }
-
-            System.out.println("json array length="+length);*/
-
-
-            if(!transit.isEmpty())
-            {
-                transit.removeAll(transit);
-            }
 
             for (int i=0; i<length; i++)
             {
@@ -302,10 +180,18 @@ public class Ratingfreg extends Fragment {
                 String  to=jsonChildNode.optString("from");
                 String  from = jsonChildNode.optString("to");
                 String  driverimg = jsonChildNode.optString("driverimg");
+                String  driverrating = jsonChildNode.optString("driverrating");
+                String  companyrating = jsonChildNode.optString("companyrating");
                 int shipmentNo=Integer.parseInt(jsonChildNode.optString("shipmentno").toString());
-                Transit_record tempclass=new Transit_record(Date_time,truck_type,from,to,shipmentNo,"http://121.241.125.91/cc/mavyn/online/"+driverimg);
+                Ratingt_report_class tempclass=new Ratingt_report_class(Date_time,truck_type,to,from,shipmentNo,"http://121.241.125.91/cc/mavyn/online/"+driverimg,driverrating,companyrating);
                 transit.add(tempclass);
             }
+
+          /* Ratingt_report_class tempclass=new Ratingt_report_class("tyety","sfj","delhi","local",123,"http://121.241.125.91/cc/mavyn/online/","2.0","2.0");
+             transit.add(tempclass); */
+
+
+            mAdapter.notifyDataSetChanged();
 
         }
         catch (JSONException e)

@@ -56,7 +56,7 @@ public class SplasScreen extends AppCompatActivity {
 
 	private final int SPLASH_DISPLAY_LENGTH = 3000;
 	private Intent first_activity;
-	private Intent second_activity;// not used
+	private Intent second_activity;
 	private Intent third_activity;
 	private Intent forth_activity;
 	private Intent fifth_activity;
@@ -71,14 +71,10 @@ public class SplasScreen extends AppCompatActivity {
 	private Download_First_Open_Vehicle hit_vehicle_open;
 	private Download_First_Close_Vehicle hit_vehicle_close;
 	private DownloadState citydownload;
-	//private Context context=getApplicationContext();
 
 
 	private static volatile String first_open_v_id=null;
 	private static volatile String first_close_v_id=null;
-
-	//open all databases
-
 
 	private City_list_Dbhlper city_db;
 	private Open_Catrgy_Dbhlper open_ctrgy_db;
@@ -91,42 +87,11 @@ public class SplasScreen extends AppCompatActivity {
 
 	private SharedPreferences sharedpreferences;
 	private SharedPreferences.Editor editor;
-	public static final String MyPREFERENCES = "MyPrefs" ;
+	public static final String MyPREFERENCES = "U_id" ;
 	private String userid=null;
 	private Timer timer;
 	private mycallable callab;
 	private Thread callabtask;
-
-
-    // variable for the profile module
-
-
-
-	@Override
-	public void onPause()
-	{
-	   super.onPause();
-	   //finish();
-	}
-	
-	private void writestateToInternalStorage() 
-	{
-            byte b=0;
-	        try {
-	       
-	        FileOutputStream fos = openFileOutput("loginstatus.txt", Context.MODE_PRIVATE);
-	   
-	        fos.write(b);
-	        fos.close();
-	        
-	            } 
-	        catch (Exception e) 
-	        {
-	         Log.i("Error_In_login", e.getMessage());
-	      
-	        }
-	 }
-
 
 	@Override
 	protected void onStart() {
@@ -136,31 +101,34 @@ public class SplasScreen extends AppCompatActivity {
 	}
 
 	@Override
+	public void onPause()
+	{
+		super.onPause();
+
+	}
+
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_splash);
 
+		//startService(new Intent(getApplicationContext(),Confrimvehicledownloadservice.class));
 
 		closed_ctrgy_db=new Cls_Catrgy_Dbhlper(SplasScreen.this);
+		open_ctrgy_db=new Open_Catrgy_Dbhlper(SplasScreen.this);
 		open_ctrgy_vehicle_db=new Open_vehicle_Db(SplasScreen.this);
 		close_ctrgy_vehicle_db=new Close_vehicle_Db(SplasScreen.this);
-
 		city_db=new City_list_Dbhlper(SplasScreen.this);
 
-		open_ctrgy_db=new Open_Catrgy_Dbhlper(SplasScreen.this);
+
 
 
 		if(closed_ctrgy_db.numberOfRows()>0)
 			closed_ctrgy_db.deletetb();
 
-		if(city_db.numberOfRows()>0)
-			city_db.deletetb();
-
-
 		if(open_ctrgy_db.numberOfRows()>0)
 			open_ctrgy_db.deletetb();
-
-
 
 		if(open_ctrgy_vehicle_db.numberOfRows()>0)
 			open_ctrgy_vehicle_db.deletetb();
@@ -169,21 +137,28 @@ public class SplasScreen extends AppCompatActivity {
 		if(close_ctrgy_vehicle_db.numberOfRows()>0)
 			close_ctrgy_vehicle_db.deletetb();
 
+		if(city_db.numberOfRows()>0) {
+			city_db.deletetb();
+		}
+
+
+
+
 
 
 
 		first_activity = new Intent(this,LoginActivity.class);
+
 		second_activity = new Intent(this,HomeActivity.class);
-
 		second_activity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+
 		third_activity = new Intent(this,OrderActivity.class);
-
 		third_activity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+
 		forth_activity = new Intent(this,ConfirmShipment.class);
-
 		forth_activity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
-		fifth_activity = new Intent(this,UserRegister.class);
 
+		fifth_activity = new Intent(this,UserRegister.class);
 		fifth_activity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
 
 		// calling this function to write 0 to the status file so as to start the app from zero.
@@ -192,11 +167,11 @@ public class SplasScreen extends AppCompatActivity {
 		// overridePendingTransition(R.anim.view_show123,0);
 		//overridePendingTransition(R.anim.vanish,0);
 
-	    try 
+	    try
 	    {
-			loginstatus_value=ReadstatusFromInternalStorage();
-		} 
-	    
+			loginstatus_value=ReadLoginstatusFromInternalStorage();
+		}
+
 	    catch (FileNotFoundException e)
 		{
 
@@ -233,7 +208,7 @@ public class SplasScreen extends AppCompatActivity {
 
                 hit_vehicle_open = new Download_First_Open_Vehicle(SplasScreen.this);
 
-                // temporarly these hits are closed on trial mode
+
 
                 Thread open_vehucle = new Thread(hit_vehicle_open);
                 open_vehucle.start();
@@ -267,21 +242,22 @@ public class SplasScreen extends AppCompatActivity {
 						e.printStackTrace();
 					}
 
-				        if(loginstatus_value==1) {
+				if(loginstatus_value==0) {
 
-							startActivity(first_activity);
-							finish();
+					startActivity(first_activity);
+					finish();
 
-						}
+				}
 
 
-				  else
-						if(!Checkpendingrating())
-				        {
-							startActivity(second_activity);
-							finish();
+				else
+				if(!Checkpendingrating())
+				{
+					startService(new Intent(getApplicationContext(),Confrimvehicledownloadservice.class));
+					startActivity(second_activity);
+					finish();
 
-						}
+				}
 
 
 			}
@@ -289,16 +265,6 @@ public class SplasScreen extends AppCompatActivity {
 
 		                                                                                              ;
 	  }
-
-
-
-
-
-
-
-
-
-
 
     private void writeUrl_addressToInternalStorage(String localurl)
     {
@@ -317,6 +283,15 @@ public class SplasScreen extends AppCompatActivity {
 
         }
     }
+
+
+
+
+
+
+
+
+
 
 
     private String ReadulrFromInternalStorage()
@@ -342,34 +317,34 @@ public class SplasScreen extends AppCompatActivity {
 
         return urllocal;
     }
-	
-	
-	 private int ReadstatusFromInternalStorage() throws FileNotFoundException 
+
+
+	 private int ReadLoginstatusFromInternalStorage() throws FileNotFoundException
 	    {
-         
+
 	    	int status=0;
 	    	FileInputStream fos = openFileInput("loginstatus.txt");
-	        
+
 	        try {
 	        	status=fos.read();
 				fos.close();
 			    } catch (IOException e) {
-				
+
 			    	e.printStackTrace();
 		       }
-	        
+
 	        return status;
 	      }
-	 
-	   boolean isOnline() 
+
+
+	   boolean isOnline()
 	    {
 		    ConnectivityManager cm =
 		                      (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		    NetworkInfo netInfo = cm.getActiveNetworkInfo();
 		    return netInfo != null && netInfo.isConnectedOrConnecting();
 		}
-	   
-	   
+
 	   boolean isGpson()
 	   {
 		   LocationManager  locationManager=(LocationManager)this.getSystemService(LOCATION_SERVICE);
@@ -378,22 +353,22 @@ public class SplasScreen extends AppCompatActivity {
 	   }
 
 
-
 	private class DownloadState implements Runnable
 	{
-		Context localcontext;
 
+
+
+		Context localcontext;
 		private String local;
+
 		private BufferedReader bufferinput =null;
 		private HttpURLConnection con=null;
 		private ArrayList<String> citylistlocal=new ArrayList(30);
 		JSONObject responseObj;
-
 		public DownloadState(Context c)
 		{
 
 		}
-
 
 		ArrayList<String> getlistdata()
 		{
@@ -476,8 +451,8 @@ public class SplasScreen extends AppCompatActivity {
 						e.printStackTrace();
 					}
 
-					//citylistlocal.add(Citydata);
-					city_db.insertContact(Citydata,lat,lon,String.valueOf(i+1));
+
+					city_db.insertContact(Citydata,lat,lon);
 
 				}
 
@@ -492,17 +467,18 @@ public class SplasScreen extends AppCompatActivity {
 
 		}
 
-	}
 
+	}
 
 	private class Download_Vehicle_category implements Runnable
 	{
+
+
 		Context localcontext;
 		private String local=null;
 		BufferedReader bufferinput =null;
 		HttpURLConnection con=null;
 		URL url=null;
-
 		public Download_Vehicle_category(Context c)
 		{
 			localcontext=c;
@@ -520,7 +496,6 @@ public class SplasScreen extends AppCompatActivity {
 
 			}
 		}
-
 
 		@Override
 		public void run() {
@@ -548,8 +523,8 @@ public class SplasScreen extends AppCompatActivity {
 			Display_Vehicle_list_category(local);
 	    	}
 
-		}
 
+		}
 
 	private void Display_Vehicle_list_category(String response){
 
@@ -561,7 +536,7 @@ public class SplasScreen extends AppCompatActivity {
 
 
 			responseObj = new JSONObject(response);
-			JSONArray countryListObj = responseObj.optJSONArray("categorydata");  //.getJSONArray("transit");
+			JSONArray countryListObj = responseObj.optJSONArray("categorydata");
 
 			int length=countryListObj.length();
 
@@ -592,7 +567,7 @@ public class SplasScreen extends AppCompatActivity {
 					e.printStackTrace();
 				}
 
-				// store the vehicle id of first open category vehicle type to be downloaded
+
 				if(i==0)
 					first_open_v_id=categoryid;
 
@@ -609,21 +584,22 @@ public class SplasScreen extends AppCompatActivity {
 			System.out.println("Error in reading json object");
 		}
 
-		//open_ctrgy_db.close();
+
 
 	}
-
 
 
 	private class Download_Vehicle_categoryclose implements Runnable
 	{
 
+
+
 		Context localcontext;
+
 		private String local=null;
 		BufferedReader bufferinput =null;
 		HttpURLConnection con=null;
 		URL url=null;
-
 		public Download_Vehicle_categoryclose(Context c)
 		{
 			localcontext=c;
@@ -641,7 +617,6 @@ public class SplasScreen extends AppCompatActivity {
 
 			}
 		}
-
 
 		@Override
 		public void run() {
@@ -687,9 +662,9 @@ public class SplasScreen extends AppCompatActivity {
 		}
 
 
-
-
 	}
+
+
 
 
 	private void Display_Vehicle_list_categoryclose(String response){
@@ -702,7 +677,7 @@ public class SplasScreen extends AppCompatActivity {
 
 
 			responseObj = new JSONObject(response);
-			JSONArray countryListObj = responseObj.optJSONArray("categorydata");  //.getJSONArray("transit");
+			JSONArray countryListObj = responseObj.optJSONArray("categorydata");
 
 			int length=countryListObj.length();
 
@@ -752,9 +727,28 @@ public class SplasScreen extends AppCompatActivity {
 	private class Download_First_Open_Vehicle implements  Runnable
 	{
 
+
 		Context localcontext;
+
 		private String local=null;
 		BufferedReader bufferinput =null;
+		private void writestateToInternalStorage()
+		{
+			byte b=0;
+			try {
+
+				FileOutputStream fos = openFileOutput("loginstatus.txt", Context.MODE_PRIVATE);
+
+				fos.write(b);
+				fos.close();
+
+			}
+			catch (Exception e)
+			{
+				Log.i("Error_In_login", e.getMessage());
+
+			}
+		}
 		HttpURLConnection con=null;
 		URL url=null;
 
@@ -835,7 +829,7 @@ public class SplasScreen extends AppCompatActivity {
 
 
 			responseObj = new JSONObject(response);
-			JSONArray countryListObj = responseObj.optJSONArray("vehicledata");  //.getJSONArray("transit");
+			JSONArray countryListObj = responseObj.optJSONArray("vehicledata");
 
 			int length=countryListObj.length();
 
@@ -866,7 +860,7 @@ public class SplasScreen extends AppCompatActivity {
 				try {
 
 
-					// id = jsonChildNode.optString("id").toString();
+
 					latitute=jsonChildNode.optString("latitute").toString();
 					longitute =jsonChildNode.optString("longitude").toString();
 					description=jsonChildNode.optString("description").toString();
@@ -1070,7 +1064,7 @@ public class SplasScreen extends AppCompatActivity {
 
         boolean rating_status=false;
 		sharedpreferences = getSharedPreferences(MyPREFERENCES,SplasScreen.MODE_PRIVATE);
-		userid= sharedpreferences.getString("customer_id", "null");
+		userid= sharedpreferences.getString("userid", "null");
 
 		if( isOnline())
 		{

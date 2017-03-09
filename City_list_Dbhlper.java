@@ -18,7 +18,7 @@ public class City_list_Dbhlper extends SQLiteOpenHelper {
    private static final String city_name ="name";
     private static final String city_lat ="latitude";
     private static final String city_long ="longitude";
-    private static final String id ="id";
+
 
    public City_list_Dbhlper(Context context)
    {
@@ -38,7 +38,7 @@ public class City_list_Dbhlper extends SQLiteOpenHelper {
    @Override
    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
       // TODO Auto-generated method stub
-       if(newVersion>oldVersion) {
+       /*if(newVersion>oldVersion) {
 
 
            if (newVersion > oldVersion) {
@@ -46,18 +46,18 @@ public class City_list_Dbhlper extends SQLiteOpenHelper {
 
            }
 
-       }
+       }*/
 
    }
 
-   public boolean insertContact  (String city,String lat,String lon,String id)
+   public boolean insertContact  (String city,String lat,String lon)
    {
       SQLiteDatabase db = this.getWritableDatabase();
       ContentValues contentValues = new ContentValues();
       contentValues.put("name", city);
        contentValues.put("latitude", lat);
        contentValues.put("longitude", lon);
-       contentValues.put("id", id);
+
 
        db.insert("city_table", null, contentValues);
       return true;

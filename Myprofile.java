@@ -11,6 +11,8 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -21,6 +23,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,7 +64,7 @@ public class Myprofile extends Fragment{
         bankname=(TextView)root.findViewById(R.id.bankname);
         acno=(TextView)root.findViewById(R.id.acno);
         ifccode=(TextView)root.findViewById(R.id.ifccode);
-        profile_image=(ImageView)root.findViewById(R.id.imageView_round);
+        profile_image=(ImageView)root.findViewById(R.id.shipperprofileimage);
 
         return root;
     }
@@ -70,57 +75,53 @@ public class Myprofile extends Fragment{
         super.onActivityCreated(savedInstanceState);
 
         shipper_data = getActivity().getSharedPreferences("profiledata", Context.MODE_PRIVATE);
-        name.setText(shipper_data.getString("first_name", "null"));
-        email.setText(shipper_data.getString("email_temp", "null"));
-        mobile.setText(shipper_data.getString("Mobileno", "null"));
-        bankname.setText(shipper_data.getString("bank_name", "null"));
-        acno.setText(shipper_data.getString("acc_no", "null"));
-        ifccode.setText(shipper_data.getString("ifccode_temp", "null"));
-        //ArrayAdapter adapter = ArrayAdapter.createFromResource(getActivity(), R.array.Planets, android.R.layout.simple_list_item_1);
+        name.setText(shipper_data.getString("first_name", "Name"));
+        email.setText(shipper_data.getString("email_temp", "Email Id"));
+        mobile.setText(shipper_data.getString("Mobileno", "Mobile No"));
+        bankname.setText(shipper_data.getString("bank_name", "Account Name"));
+        acno.setText(shipper_data.getString("acc_no", "Bank Account Number"));
+        ifccode.setText(shipper_data.getString("ifccode_temp", "IFSC Code"));
 
         try {
             fos = getActivity().openFileInput("desiredFilename1.png");
+            if(fos!=null) {
+
+                pics = BitmapFactory.decodeStream(fos);
+                fos.close();
+            }
+
         }
         catch (FileNotFoundException e1)
         {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
         }
+         catch (IOException e) {
 
-        if(fos!=null) {
-
-            pics = BitmapFactory.decodeStream(fos);
-            try {
-                fos.close();
-            } catch (IOException e) {
-
-                e.printStackTrace();
-            }
-
-            profile_image.setImageBitmap(pics);
+            e.printStackTrace();
         }
 
 
-    }
+
+            Glide.with(this).load(pics).asBitmap().centerCrop().into(new BitmapImageViewTarget(profile_image) {
+                @Override
+                protected void setResource(Bitmap resource) {
+                    RoundedBitmapDrawable circularBitmapDrawable =
+                            RoundedBitmapDrawableFactory.create(getResources(), resource);
+                    circularBitmapDrawable.setCircular(true);
+                    profile_image.setImageDrawable(circularBitmapDrawable);
+                }
+            });
 
 
+
+        }
 
     public boolean isOnline()
     {
-
         ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnectedOrConnecting();
-
-
     }
-
-
-
-
-
-
-
 
 
 }

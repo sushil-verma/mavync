@@ -324,20 +324,16 @@ public class OrderActivity extends AppCompatActivity implements View.OnClickList
 
                 SharedPreferences userid = getSharedPreferences("U_id", MODE_PRIVATE);
                 String customer_id = userid.getString("userid", null);
-                hitserver hit = new hitserver(this);
 
                 if (cheking() == false) {
 
-                //    String url = "http://121.241.125.91/cc/mavyn/online/customerbooking.php";//?customer_id=" + customer_id + "&" + "source=" + source.getText() + "&" + "source_lat=" + originlate + "&" + "source_long=" + originlong + "&" + "destination=" + destination.getText() + "&" + "destination_lat=" + destinationlate + "&" + "destination_long=" + destinationlong + "&" + "user_name=" + name.getText() + "&" + "user_mobile=" + mobile.getText() + "&" + "user_address=" + address.getText() + "&" + "booking_date=" + dateView.getText() + "&" + "booking_time=" + timeView.getText() + "&" + "vehicletype_id=" + vehicle_id;
-//
-                 //   String abc = "http://121.241.125.91/cc/mavyn/online/customerbooking.php?customer_id=" + customer_id + "&" + "source='" + source.getText() + "'&" + "source_lat=" + originlate + "&" + "source_long=" + originlong + "&" + "destination='" + destination.getText() + "'&" + "destination_lat=" + destinationlate + "&" + "destination_long=" + destinationlong + "&" + "user_name=" + name.getText() + "&" + "user_mobile=" + mobile.getText() + "&" + "user_address=" + address.getText() + "&" + "booking_date=" + dateView.getText() + "&" + "booking_time=" + timeView.getText() + "&" + "vehicletype_id=" + vehicle_id;
-                    // hit.execute(abc);
-                   // registerUser(url, customer_id, source.getText(), originlate, originlong, destination.getText(), destinationlate, destinationlong, name.getText(), mobile.getText(), address.getText(), dateView.getText(), timeView.getText(), vehicle_id);
-                  //  registerUser(url,customer_id,source.getText(),originlate,originlong,destination.getText(),destinationlate,destinationlong,name.getText(),mobile.getText(),address.getText(),dateView.getText(),timeView.getText(),);
+                    String url = "http://121.241.125.91/cc/mavyn/online/customerbooking.php";
+                    registerUser(url, customer_id, source.getText().toString(), String.valueOf(originlate), String.valueOf(originlong), destination.getText().toString(),String.valueOf( destinationlate), String.valueOf(destinationlong), name.getText().toString().toString(), mobile.getText().toString(), address.getText().toString(), dateView.getText().toString(), timeView.getText().toString(), vehicle_id);
 
                 }
 
 
+                break;
 
             case R.id.cancelshipment:
 
@@ -349,7 +345,7 @@ public class OrderActivity extends AppCompatActivity implements View.OnClickList
     }
 
 
-    private void registerUser(final String url, final String customer_id, final String source,final  String source_lat, final String source_long, final  String destination, final  String destination_lat, final  String destination_long, final String user_name, final  String user_mobile, final  String user_address, final String booking_date, final String booking_time, final String vehicletype_id){
+    private void registerUser(String url, final String customer_id, final String source,final  String source_lat, final String source_long, final  String destination, final  String destination_lat, final  String destination_long, final String user_name, final  String user_mobile, final  String user_address, final String booking_date, final String booking_time, final String vehicletype_id){
 
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
@@ -438,68 +434,7 @@ public class OrderActivity extends AppCompatActivity implements View.OnClickList
         client.disconnect();
     }
 
-    private class hitserver extends AsyncTask<String, Void, String> {
-        Context localcontext;
-        private ProgressDialog dialog;
-        private String local = "abc";
 
-        public hitserver(Context c) {
-            localcontext = c;
-        }
-
-        protected void onPreExecute() {
-            dialog = new ProgressDialog(localcontext);
-            dialog.setMessage("... Please wait...");
-            dialog.show();
-        }
-
-
-        protected String doInBackground(String... urls) {
-
-            BufferedReader bufferinput = null;
-            HttpURLConnection con = null;
-
-            try {
-
-                URL url = new URL(urls[0]);
-                con = (HttpURLConnection) url.openConnection();
-                bufferinput = new BufferedReader(new InputStreamReader((con.getInputStream())));
-
-                    local = bufferinput.readLine();
-                    System.out.println("json data" + local);
-                    bufferinput.close();
-                    Log.i("Json data received..", local);
-
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.i("Erro", "data downloading erro");
-
-            }
-
-
-            con.disconnect();
-
-            return local;
-        }
-
-        /*  protected void onCancelled()
-          {
-           dialog.dismiss();
-           Toast toast = Toast.makeText(localcontext,"Error connecting to Server", Toast.LENGTH_LONG);
-           toast.setGravity(Gravity.TOP, 25, 400);
-           toast.show();
-           }
-    */
-        protected void onPostExecute(String content) {
-            dialog.dismiss();
-
-            ReceiveJsonData(content);
-
-
-        }
-
-    }
 
 
     private void ReceiveJsonData(String response) {
@@ -518,7 +453,7 @@ public class OrderActivity extends AppCompatActivity implements View.OnClickList
 
 
             responseObj = new JSONObject(response);
-            JSONArray countryListObj = responseObj.optJSONArray("bookingdata");  //.getJSONArray("transit");
+            JSONArray countryListObj = responseObj.optJSONArray("bookingdata");
 
             int length = countryListObj.length();
 

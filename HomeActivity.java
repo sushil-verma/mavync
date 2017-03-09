@@ -58,18 +58,6 @@ public class HomeActivity extends AppCompatActivity {
         newFragment2.show(getSupportFragmentManager(), "dialog");
     }
 
-    public void doPositiveClick() {
-        // Do stuff here.
-        Log.i("FragmentAlertDialog", "Positive click!");
-
-        finish();
-    }
-
-    public void doNegativeClick() {
-        // Do stuff here.
-        Log.i("FragmentAlertDialog", "Negative click!");
-
-    }
 
 
 
@@ -81,16 +69,7 @@ public class HomeActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         fmanager=getSupportFragmentManager();
 
-      /*   city_db=new City_list_Dbhlper(HomeActivity.this);
-        open_ctrgy_db=new Open_Catrgy_Dbhlper(HomeActivity.this);
-       open_ctrgy_vehicle_db=new Open_Catrgy_vehicle_for_Dbhlper(HomeActivity.this);
-        closed_ctrgy_db=new Closed_Catrgy_Dbhlper(HomeActivity.this);
-        close_ctrgy_vehicle_db=new Closed_Catrgy_vehicle_for_Dbhlper(HomeActivity.this);*/
 
-
-       // citylist=new ArrayList<String>(100);
-
-        //citylist=(ArrayList<String>) getIntent().getSerializableExtra("city");
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -186,42 +165,13 @@ public class HomeActivity extends AppCompatActivity {
                 break;
 
             case R.id.logout:
-                // fragmentClass = ThirdFragment.class;
-               /* AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-                // alertDialogBuilder.setTitle("Exit Application?");
-                alertDialogBuilder
-                        .setMessage("Are You Sure To Logout?")
-                        .setCancelable(false)
-                        .setPositiveButton("Yes",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        moveTaskToBack(true);
 
-
-                                        writestateToInternalStorage();
-                                        dialog.cancel();
-                                        startActivity(new Intent(getApplicationContext(),LoginActivity.class));
-                                        finish();
-                                    }
-                                })
-
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-
-                                dialog.cancel();
-                            }
-                        });
-
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();*/
 
                 showDialog();
-
-                //fragmentClass = Logoutfreg.class;
                 flag=true;
                 break;
             default:
-               // fragmentClass = FirstFragment.class;
+
         }
 
         try
@@ -231,7 +181,6 @@ public class HomeActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        // Insert the fragment by replacing any existing fragment
 
         try {
             fmanager.beginTransaction().replace(R.id.container, fragment).commit();

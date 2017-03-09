@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -101,19 +102,19 @@ public class ConfirmShipment extends AppCompatActivity implements View.OnClickLi
         {
             case R.id.confirm_normal_shipment:
 
-                sendconfirmstatus("normal");
+                sendconfirmstatus("normalshipment");
 
 
                 break;
 
             case R.id.confirm_express_shipment:
 
-                sendconfirmstatus("express");
+                sendconfirmstatus("expressshipment");
                 break;
 
             case R.id.cancel:
 
-                sendconfirmstatus("cancel");
+                sendconfirmstatus("cancelshipment");
 
 
                              finish();
@@ -143,55 +144,16 @@ public class ConfirmShipment extends AppCompatActivity implements View.OnClickLi
     }
 
 
-   void sendconfirmstatus(String Status)
+   void sendconfirmstatus(final String Status)
     {
 
         SharedPreferences userid = getSharedPreferences("U_id", MODE_PRIVATE);
         String customer_id = userid.getString("userid", null);
-        String url="http://121.241.125.91/cc/mavyn/online/customerbooking.php?customer_id="+customer_id+"&shipment_no="+intent.getStringExtra("shipmentno")+"&sipment_type="+Status;
+        String url="http://121.241.125.91/cc/mavyn/online/customerbooking.php?shipment_no="+shipmentno.getText().toString()+"&"+Status+"=1";
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-
-                /*try {
-                    JSONObject jsonResponse = new JSONObject(s);
-
-                    JSONArray jsonMainNode=jsonResponse.optJSONArray("chetak");
-
-                    JSONObject jsonChildNode = jsonMainNode.getJSONObject(0);
-                    String imageurl_received_local=jsonChildNode.optString("imageurl").toString();
-                    String f_name=jsonChildNode.optString("firstname").toString();
-                    String l_name=jsonChildNode.optString("lastname").toString();
-                    String Mobile= jsonChildNode.optString("mobileno").toString();
-  						*//*Bundle bnd=new Bundle();
-  						bnd.putInt("value",1);
-  						bnd.putString("imageurl",imageurl_received_local);
-  						receiver.send(1, bnd);*//*
-
-                    if(imageurl_received_local!=null)
-                    {
-
-                        if(profile_pics_changed)
-                        {
-
-                            hitimage=new Hit_image(Image_url_Received);
-
-
-
-                        }
-                    }
-
-
-                } catch (JSONException e)
-
-                {
-
-                    e.printStackTrace();
-
-                }*/
-
-
-
+                startActivity(new Intent(getApplicationContext(),BookingConfirmation.class).putExtra("bookingtype",Status));
 
 
             }
@@ -201,7 +163,7 @@ public class ConfirmShipment extends AppCompatActivity implements View.OnClickLi
                     @Override
                     public void onErrorResponse(VolleyError volleyError) {
 
-
+                        Toast.makeText(getApplicationContext(),"Response error",Toast.LENGTH_SHORT).show();
                         volleyError.printStackTrace();
                     }
                 })

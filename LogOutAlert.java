@@ -26,6 +26,7 @@ public class LogOutAlert extends Activity {
 
 	   Intent i=null;
 
+	// currently this file is replaced with Logoutfreg.java and not in current use.
 
 		 @Override
 		 protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +58,9 @@ public class LogOutAlert extends Activity {
 		             
 		             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 		                 public void onClick(DialogInterface dialog, int id) {
+
+
+
 
 
 							 writestateToInternalStorage();

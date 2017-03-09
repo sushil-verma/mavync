@@ -311,7 +311,7 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
             e.printStackTrace();
         }
         m.onCreate(savedInstanceState);
-        m.onResume();
+
         m.getMapAsync(this);
 
         header = (LinearLayout) v.findViewById(R.id.header);
@@ -476,6 +476,8 @@ public class CreateShipment extends Fragment implements OnMapReadyCallback, View
         return v;
 
     }
+
+
 
 
     @Override
